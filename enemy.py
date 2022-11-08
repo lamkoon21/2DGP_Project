@@ -1,5 +1,3 @@
-from lib2to3.pgen2.token import LEFTSHIFT
-from turtle import Turtle
 from pico2d import *
 import ingame
 
@@ -9,12 +7,16 @@ LEFT = 30
 RIGHT = 1890
 
 class Crawlid:
+    image_l = None
+    image_r = None
     def __init__(self):
         self.x, self. y = None, None
         self.frame = 0
         self.dir = 1
-        self.image_l = load_image('image/enemy/Crawlid_L.png')
-        self.image_r = load_image('image/enemy/Crawlid_R.png')
+        if  Crawlid.image_l == None:
+            Crawlid.image_l = load_image('image/enemy/Crawlid_L.png')
+        if  Crawlid.image_r == None:
+            Crawlid.image_r = load_image('image/enemy/Crawlid_R.png')
         self.turn = False
         self.move = True
         self.move_time = 3
@@ -113,12 +115,16 @@ class Crawlid:
                 self.image_l.clip_draw(self.frame * 119 + 3, 365, 115, 80, self.x, self.y - 20)
       
 class Husk:
+    image_l = None
+    image_r = None
     def __init__(self):
         self.x, self. y = None, None
         self.frame = 0
         self.dir = -1
-        self.image_l = load_image('image/enemy/Husk_L.png')
-        self.image_r = load_image('image/enemy/Husk_R.png')
+        if Husk.image_l == None:
+            Husk.image_l = load_image('image/enemy/Husk_L.png')
+        if Husk.image_r == None:
+            Husk.image_r = load_image('image/enemy/Husk_R.png')
         self.turn = False
         self.move = True
         self.move_time = 3
@@ -284,13 +290,17 @@ class Husk:
                 self.image_l.clip_draw(self.frame * 118 + 3, 865, 115, 130, self.x, self.y)
 
 class Vengefly:
+    image_l = None
+    image_r = None
     def __init__(self):
         self.x, self. y = None, None
         self.frame = 0
         self.dir = -1
         self.dir_y = 0
-        self.image_l = load_image('image/enemy/Vengefly_L.png')
-        self.image_r = load_image('image/enemy/Vengefly_R.png')
+        if Vengefly.image_l == None:
+            Vengefly.image_l = load_image('image/enemy/Vengefly_L.png')
+        if Vengefly.image_r == None:
+            Vengefly.image_r = load_image('image/enemy/Vengefly_R.png')
         self.turn = False
         self.move = True
         self.move_time = 3
