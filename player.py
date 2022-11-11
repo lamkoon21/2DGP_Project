@@ -197,7 +197,6 @@ class Knight:
             self.y = TOP
             self.fall = True
 
-
    
     def draw(self):
         if self.face_dir == 1:
@@ -205,14 +204,16 @@ class Knight:
                 self.image_r.clip_draw(5, 560, 130, 130, self.x, self.y)
             elif self.attack:
                 self.image_r.clip_draw(int(self.frame) * 128 + 10, 415, 120, 130, self.x - 20, self.y)
-                if self.frame < 2 or 5 < self.frame < 7:
+                if int(self.frame) < 2 or 5 < int(self.frame) < 7:
                     self.attack_effect.clip_composite_draw(0, 0, 160, 120, 0, 'h', self.x + self.face_dir * 80, self.y, 220, 165)
-                elif self.frame < 4 or 5 < self.frame < 9:
+                elif int(self.frame) < 4 or 5 < int(self.frame) < 9:
                     self.attack_effect.clip_composite_draw(160, 0, 140, 120, 0, 'h', self.x + self.face_dir * 80, self.y, 220, 165)
             elif self.fall:
                 self.image_r.clip_draw(int(self.frame) * 128 + 10, 145, 101, 120, self.x, self.y)        
             elif self.dash:
                 self.image_r.clip_draw(int(self.frame) * 280, 290, 280, 126, self.x - 95, self.y)
+                if 0 < int(self.frame) < 6:
+                    self.dash_effect.clip_composite_draw(int(self.frame) * 360, 0, 360, 220, 0, 'h', self.x + self.face_dir * - 200, self.y - 20, 360, 220)
             elif self.jump:
                 self.image_r.clip_draw(int(self.frame) * 128 + 10, 145, 101, 120, self.x, self.y)
             elif self.map_open:
@@ -231,14 +232,16 @@ class Knight:
                 self.image_r.clip_composite_draw(5, 560, 130, 130, 0, 'h', self.x, self.y, 130, 130)
             elif self.attack:
                 self.image_l.clip_draw(3180 - 10 - int(self.frame) * 128, 415, 120, 130, self.x + 40, self.y)
-                if self.frame < 2 or 5 < self.frame < 7:
+                if int(self.frame) < 2 or 5 < int(self.frame) < 7:
                     self.attack_effect.clip_composite_draw(0, 0, 160, 120, 0, '', self.x + self.face_dir * 60, self.y, 220, 165)
-                elif self.frame < 4 or 5 < self.frame < 9:
+                elif int(self.frame) < 4 or 5 < int(self.frame) < 9:
                     self.attack_effect.clip_composite_draw(160, 0, 140, 120, 0, '', self.x + self.face_dir * 60, self.y, 220, 165)
             elif self.fall:
                 self.image_l.clip_draw(3180 - 10 - int(self.frame) * 128, 145, 101, 120, self.x, self.y)
             elif self.dash:
                 self.image_l.clip_draw(3025 - int(self.frame) * 280, 290, 280, 126, self.x + 120, self.y)
+                if 0 < int(self.frame) < 6:
+                    self.dash_effect.clip_composite_draw(int(self.frame) * 360, 0, 360, 220, 0, '', self.x + self.face_dir * - 220, self.y - 20, 360, 220)
             elif self.jump:
                 self.image_l.clip_draw(3180 - 10 - int(self.frame) * 128, 145, 101, 120, self.x, self.y)
             elif self.map_open:

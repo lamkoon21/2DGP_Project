@@ -18,6 +18,7 @@ soul = None
 crawlids = []
 husks = []
 vengeflies = []
+back = None
 
 class Floor:
     def __init__(self):
@@ -67,17 +68,17 @@ def handle_events():
             knight.handle_events(event)
 
 def enter():
-    global knight, floor, crawlids, husks, vengeflies
-    
+    global knight, floor, crawlids, husks, vengeflies, back
+    back = load_image('image/map/background.png')
     floor = Floor()
     game_world.add_object(floor, 0)
     
-    set_crawlid(1700, BOTTOM, 1000, RIGHT)
-    set_husk(1400, BOTTOM, 900, 1600)
-    set_vengefly(1400, 750, 1000, 1700)
-    game_world.add_objects(crawlids, 1)
-    game_world.add_objects(husks, 1)
-    game_world.add_objects(vengeflies, 1)
+    # set_crawlid(1700, BOTTOM, 1000, RIGHT)
+    # set_husk(1400, BOTTOM, 900, 1600)
+    # set_vengefly(1400, 750, 1000, 1700)
+    # game_world.add_objects(crawlids, 1)
+    # game_world.add_objects(husks, 1)
+    # game_world.add_objects(vengeflies, 1)
     
     set_knight(400, BOTTOM)
     
@@ -92,6 +93,7 @@ def enter():
 def exit():
     game_world.clear()
     
+    
 def update():
     for game_object in game_world.all_objects():
         game_object.update()
@@ -105,12 +107,35 @@ def update():
         
 def draw():
     clear_canvas()
+    back.draw(960, 540)
     draw_world()
     update_canvas()
 
 def draw_world():
     for game_object in game_world.all_objects():
         game_object.draw()
+        
+def pause():
+    pass
+
+def resume():
+    pass
+        
+def collide(a, b):
+    left_a, bottom_a, right_a, top_a = a.get_bb()
+    left_b, bottom_b, right_b, top_b = b.get_bb()
+    
+    if left_a > right_b: return False
+    if right_a < left_b: return False
+    if top_a < bottom_b: return False
+    if bottom_a > top_b: return False
+    
+    return True
+
+
+
+        
+# set objects
     
 def set_crawlid(x, y, x1, x2):
     global crawlids
@@ -148,20 +173,4 @@ def set_knight(x, y):
     game_world.add_object(knight, 1)
     game_world.add_object(spike, 1)
     game_world.add_object(soul, 2)
-    
-def pause():
-    pass
 
-def resume():
-    pass
-
-def collide(a, b):
-    left_a, bottom_a, right_a, top_a = a.get_bb()
-    left_b, bottom_b, right_b, top_b = b.get_bb()
-    
-    if left_a > right_b: return False
-    if right_a < left_b: return False
-    if top_a < bottom_b: return False
-    if bottom_a > top_b: return False
-    
-    return True
