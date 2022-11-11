@@ -27,6 +27,8 @@ class Knight:
         self.face_dir = 1
         self.image_l = load_image('image/knight/knight_L.png')
         self.image_r = load_image('image/knight/knight_R.png')
+        self.dash_effect = load_image('image/knight/dash_effect.png')
+        self.attack_effect = load_image('image/knight/attack_effect.png')
         self.idle = False
         self.move = False
         self.fall = False
@@ -202,7 +204,11 @@ class Knight:
             if self.damage:
                 self.image_r.clip_draw(5, 560, 130, 130, self.x, self.y)
             elif self.attack:
-                self.image_r.clip_draw(int(self.frame) * 128 + 10, 415, 126, 130, self.x - 20, self.y)
+                self.image_r.clip_draw(int(self.frame) * 128 + 10, 415, 120, 130, self.x - 20, self.y)
+                if self.frame < 2 or 5 < self.frame < 7:
+                    self.attack_effect.clip_composite_draw(0, 0, 160, 120, 0, 'h', self.x + self.face_dir * 80, self.y, 220, 165)
+                elif self.frame < 4 or 5 < self.frame < 9:
+                    self.attack_effect.clip_composite_draw(160, 0, 140, 120, 0, 'h', self.x + self.face_dir * 80, self.y, 220, 165)
             elif self.fall:
                 self.image_r.clip_draw(int(self.frame) * 128 + 10, 145, 101, 120, self.x, self.y)        
             elif self.dash:
@@ -224,7 +230,11 @@ class Knight:
             if self.damage:
                 self.image_r.clip_composite_draw(5, 560, 130, 130, 0, 'h', self.x, self.y, 130, 130)
             elif self.attack:
-                self.image_l.clip_draw(3180 - 10 - int(self.frame) * 128, 415, 126, 130, self.x + 40, self.y)
+                self.image_l.clip_draw(3180 - 10 - int(self.frame) * 128, 415, 120, 130, self.x + 40, self.y)
+                if self.frame < 2 or 5 < self.frame < 7:
+                    self.attack_effect.clip_composite_draw(0, 0, 160, 120, 0, '', self.x + self.face_dir * 60, self.y, 220, 165)
+                elif self.frame < 4 or 5 < self.frame < 9:
+                    self.attack_effect.clip_composite_draw(160, 0, 140, 120, 0, '', self.x + self.face_dir * 60, self.y, 220, 165)
             elif self.fall:
                 self.image_l.clip_draw(3180 - 10 - int(self.frame) * 128, 145, 101, 120, self.x, self.y)
             elif self.dash:
