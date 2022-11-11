@@ -42,7 +42,6 @@ def clear():
 
 def add_collision_pairs(a, b, group):
     if group not in collision_group:
-        print('new group')
         collision_group[group] = [  [], []  ]
         
     if a:

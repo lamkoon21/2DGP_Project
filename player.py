@@ -33,6 +33,7 @@ class Knight:
         self.dash = False
         self.attack = False
         self.attack_2 = False
+        self.attack_count = False
         self.damage = False
         self.no_dmg = False
         self.dead = False
@@ -56,11 +57,6 @@ class Knight:
                 else: self.gravity = 0
                 self.face_dir = self.dir
                 self.damage_time = 100
-                
-                for i in game_world.objects:
-                    for o in i:
-                        if o == ingame.spike:
-                            game_world.remove_object(ingame.spike)
                 self.dash = False
                 self.jump = False
                 self.fall = False
@@ -70,26 +66,26 @@ class Knight:
                 
         elif self.attack:
             if self.attack_2:
-                self.frame = (self.frame + 5 * ACTION_PER_TIME * game_framework.frame_time * 3) % 5 + 5
-                if ingame.spike.attack_count:
-                    self.x += self.dir * -100
-                
+                self.frame = (self.frame + 5 * ACTION_PER_TIME * game_framework.frame_time * 2) % 5 + 5
+                         
                 if int(self.frame) == 9:
                     self.attack = False
                     self.attack_2 = False
+                    if self.attack_count:
+                        self.soul += 1
+                    self.attack_count = False
                     self.frame = 0
-                    game_world.remove_object(ingame.spike)
                     
             else:
-                self.frame = (self.frame + 5 * ACTION_PER_TIME * game_framework.frame_time * 3) % 5
-                if ingame.spike.attack_count:
-                    self.x += self.dir * -100
+                self.frame = (self.frame + 5 * ACTION_PER_TIME * game_framework.frame_time * 2) % 5
                     
                 if int(self.frame) == 4:
                     self.attack = False
                     self.attack_2 = True
+                    if self.attack_count:
+                        self.soul += 1
+                    self.attack_count = False
                     self.frame = 0
-                    game_world.remove_object(ingame.spike)
                     
                     
             if self.move:
@@ -98,9 +94,9 @@ class Knight:
             if self.fall or self.jump:
                 self.gravity += G
                 self.y += (FALL_G - self.gravity)
-            else:
-                # self.x += self.dir * -1
-                pass
+                
+            if self.attack_count:
+                self.x += self.dir * -3
                 
         elif self.fall:
             if int(self.frame) < 7:
@@ -158,11 +154,6 @@ class Knight:
                         self.frame = 0
                         self.dash = False
                         self.dash_count = 0
-                        
-                        
-        # if ingame.knight.x - 20 <= ingame.husk.x + 50 and ingame.knight.y + 30 <= ingame.husk.y - 50 and ingame.knight.x + 20 >= ingame.husk.x - 50 and ingame.knight.y - 30 >= ingame.husk.y + 50:
-        #     if ingame.knight.damage == False and ingame.knight.no_dmg == False:
-        #         self.damage = True
             
         # range
         if self.x > RIGHT:
@@ -247,8 +238,6 @@ class Knight:
                             if self.frame != 0:
                                 self.frame = 0
                             self.attack = True
-                            ingame.spike = Spike()
-                            game_world.add_object(ingame.spike, 1)
                     case pico2d.SDLK_c:        # dash
                         if self.dash == False:
                             if self.dash_count < 1:
@@ -319,29 +308,24 @@ class Knight:
 class Spike:
     def __init__(self):
         self.x, self.y = ingame.knight.x, ingame.knight.y
-        self.attack_count = False
         
     def update(self):
         self.x, self.y = ingame.knight.x, ingame.knight.y
-        if ingame.knight.attack == False:
-            self.attack_count = False
     
     def draw(self):
         if ingame.collide_box:
             draw_rectangle(*self.get_bb())
     
     def get_bb(self):
-        if ingame.knight.dir == 1: return ingame.knight.x, ingame.knight.y - 40, ingame.knight.x + 120, ingame.knight.y + 40
+        if ingame.knight.face_dir == 1: return ingame.knight.x, ingame.knight.y - 40, ingame.knight.x + 120, ingame.knight.y + 40
         else: return ingame.knight.x, ingame.knight.y - 40, ingame.knight.x - 120, ingame.knight.y + 40
         
     def handle_collision(self, other, group):
-        match group:
-            case 'spike:crawlid':
-                self.attack_count = True
-                ingame.knight.soul += 1
-            case 'spike:husk':
-                self.attack_count = True
-                ingame.knight.soul += 1
-            case 'spike:vengefly':
-                self.attack_count = True
-                ingame.knight.soul += 1
+        if ingame.knight.attack and other.dead == False:
+            match group:
+                case 'spike:crawlid':
+                    ingame.knight.attack_count = True
+                case 'spike:husk':
+                    ingame.knight.attack_count = True
+                case 'spike:vengefly':
+                    ingame.knight.attack_count = True

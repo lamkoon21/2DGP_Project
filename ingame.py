@@ -65,10 +65,10 @@ def enter():
     
     set_crawlid(1700, BOTTOM, 1000, RIGHT)
     set_husk(1400, BOTTOM, 900, 1600)
-    # set_vengefly(1400, 750, 1000, 1700)
+    set_vengefly(1400, 750, 1000, 1700)
     game_world.add_objects(crawlids, 1)
     game_world.add_objects(husks, 1)
-    # game_world.add_objects(vengeflies, 1)
+    game_world.add_objects(vengeflies, 1)
     
     set_knight(400, BOTTOM)
     
@@ -132,10 +132,12 @@ def set_knight(x, y):
     knight = player.Knight()
     knight.x = x
     knight.y = y
+    spike = player.Spike()
     soul = ui_soul.Soul()
     soul.hp = knight.hp
     soul.soul = knight.soul
     game_world.add_object(knight, 1)
+    game_world.add_object(spike, 1)
     game_world.add_object(soul, 2)
     
 def pause():
