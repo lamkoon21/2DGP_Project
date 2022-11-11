@@ -27,11 +27,13 @@ class Crawlid:
             Crawlid.image_l = load_image('image/enemy/Crawlid_L.png')
         if  Crawlid.image_r == None:
             Crawlid.image_r = load_image('image/enemy/Crawlid_R.png')
+        self.font = load_font('ENCR10B.TTF', 16)
         self.turn = False
         self.move = True
         self.attack = False
         self.range_x1, self.range_x2 = None, None
         self.damage = False
+        self.damage_back = 3
         self.hp = 2
         self.gravity = 0
         self.dead = False
@@ -45,19 +47,25 @@ class Crawlid:
             
             if self.dead_back == None:
                 if self.y > BOTTOM:
-                    self.gravity += 1
+                    self.gravity += 0.5
                     self.y -= self.gravity
+                    self.dead_back = 3
                 else:
                     self.y = BOTTOM
                     self.gravity = 0
                     self.dead_back = 3
             elif self.dead_back > 0:
                 self.x += (self.dead_back * 2)
-                self.gravity += 1
+                self.gravity += 0.5
                 self.y += (self.dead_back * 2) - self.gravity
                 if self.y <= BOTTOM:
                     self.dead_back -= 1
                     self.gravity = 0
+                    
+        elif self.damage:
+            if self.damage_back > 0:
+                self.x += ingame.knight.dir * -5
+                self.damage_back -= 1
                 
         elif self.turn:
             if self.x < self.range_x1:
@@ -75,7 +83,7 @@ class Crawlid:
                 
         elif self.move:
             self.frame = (self.frame + 4 * ACTION_PER_TIME * game_framework.frame_time) % 4
-            self.x += self.dir * 2
+            self.x += self.dir * 5
                 
         range_check(self)
             
@@ -88,6 +96,7 @@ class Crawlid:
     def draw(self):
         if ingame.collide_box:
             draw_rectangle(*self.get_bb())
+            self.font.draw(self.x, self.y + 60, f'(HP: {self.hp})', (255, 255, 0))
         if self.dir == 1:
             if self.dead:
                 self.image_r.clip_draw(345 - int(self.frame) * 130, 0, 140, 90, self.x, self.y - 20)
@@ -112,7 +121,15 @@ class Crawlid:
         return self.x - 50, self.y - 60, self.x + 50, self.y + 20
     
     def handle_collision(self, other, group):
-        pass
+        if self.dead == False:
+            if group == 'spike:crawlid':
+                if ingame.knight.attack:
+                    if self.damage == False:
+                        self.hp -= 1
+                        self.damage = True
+                else:
+                    self.damage = False
+                    self.damage_back = 3
       
 class Husk:
     image_l = None
@@ -125,39 +142,88 @@ class Husk:
             Husk.image_l = load_image('image/enemy/Husk_L.png')
         if Husk.image_r == None:
             Husk.image_r = load_image('image/enemy/Husk_R.png')
+        self.font = load_font('ENCR10B.TTF', 16)
         self.turn = False
         self.move = True
         self.range_x1, self.range_x2 = None, None
         self.find = False
         self.attack = False
         self.attack_range = 150
+        self.damage = False
+        self.damage_count = False
+        self.damage_back = 5
         self.hp = 3
         self.gravity = 0
         self.dead = False
         self.dead_back = None
     
     def update(self):
+        
+         # attack range
+        if self.find == False and self.attack == False:
+            if ingame.knight.y - 50 < self.y + 50:
+                if ingame.knight.x > self.x - 400 and ingame.knight.x < self.x + 400:
+                    if self.dir == 1:
+                        if ingame.knight.x < self.x:
+                            self.dir = -1
+                        self.find = True
+                        self.frame = 0
+                    elif self.dir == -1:
+                        if ingame.knight.x > self.x:
+                            self.dir = 1
+                        self.find = True
+                        self.frame = 0
+        
         if self.dead:
             self.hp = -1
             if int(self.frame) < 7:
                 self.frame = (self.frame + 8 * ACTION_PER_TIME * game_framework.frame_time) % 8
-                
+            
             if self.dead_back == None:
                 if self.y > BOTTOM:
-                    self.gravity += 1
+                    self.gravity += 0.5
                     self.y -= self.gravity
+                    self.dead_back = 3
                 else:
                     self.y = BOTTOM
                     self.gravity = 0
                     self.dead_back = 3
             elif self.dead_back > 0:
                 self.x += (self.dead_back * 2)
-                self.gravity += 1
+                self.gravity += 0.5
                 self.y += (self.dead_back * 2) - self.gravity
                 if self.y <= BOTTOM:
                     self.dead_back -= 1
                     self.gravity = 0
                 
+        elif self.move:
+            self.frame = (self.frame + 7 * ACTION_PER_TIME * game_framework.frame_time) % 7
+            self.x += self.dir * 2
+        
+        if self.dead:
+            pass
+        
+        elif self.damage:
+            if self.damage_back > 0:
+                self.x += ingame.knight.dir * -10
+                self.damage_back -= 1
+            else:
+                self.damage = False
+                self.damage_back = 5
+                self.attack = True
+          
+        elif self.find:
+            self.move = False
+            if self.attack == False:
+    
+                if int(self.frame) < 3:
+                    self.frame = (self.frame + 4 * ACTION_PER_TIME * game_framework.frame_time) % 4
+                    
+                else:
+                    self.find = False
+                    self.attack = True
+                    self.frame = 0
+        
         elif self.turn:
             if self.x < self.range_x1:
                 self.x = self.range_x1
@@ -175,28 +241,13 @@ class Husk:
             if self.attack:
                 self.attack = False
                 self.move = True
-                
-        elif self.move:
-            self.frame = (self.frame + 7 * ACTION_PER_TIME * game_framework.frame_time) % 7
-            self.x += self.dir * 1.5
-                
-        if self.find:
-            self.move = False
-            if self.attack == False:
-    
-                if int(self.frame) < 3:
-                    self.frame = (self.frame + 4 * ACTION_PER_TIME * game_framework.frame_time) % 4
-                    
-                else:
-                    self.find = False
-                    self.attack = True
-                    self.frame = 0
                     
         elif self.attack:
             self.frame = (self.frame + 4 * ACTION_PER_TIME * game_framework.frame_time) % 4
-            self.x += self.dir * 4
+            self.x += self.dir * 5.5
             
-            if ingame.knight.y - 50 > self.y + 50 or ingame.knight.x < self.x - 350 or ingame.knight.x > self.x + 350:
+            if self.dir == 1:
+                if ingame.knight.y - 50 > self.y + 50 or ingame.knight.x < self.x or ingame.knight.x > self.x + 350:
                     if self.attack_range > 0:
                         self.attack_range -= abs(self.dir * 2)
                     else:
@@ -204,21 +255,15 @@ class Husk:
                         self.move = True
                         self.attack = False
                         self.attack_range = 150
-                        
-        # attack range
-        if self.find == False and self.attack == False:
-            if ingame.knight.y - 50 < self.y + 50:
-                if ingame.knight.x > self.x - 400 and ingame.knight.x < self.x + 400:
-                    if self.dir == 1:
-                        if ingame.knight.x < self.x:
-                            self.dir = -1
-                        self.find = True
+            else:
+                if ingame.knight.y - 50 > self.y + 50 or ingame.knight.x < self.x - 350 or ingame.knight.x > self.x:
+                    if self.attack_range > 0:
+                        self.attack_range -= abs(self.dir * 2)
+                    else:
                         self.frame = 0
-                    elif self.dir == -1:
-                        if ingame.knight.x > self.x:
-                            self.dir = 1
-                        self.find = True
-                        self.frame = 0
+                        self.move = True
+                        self.attack = False
+                        self.attack_range = 150    
                         
         range_check(self)
             
@@ -228,12 +273,17 @@ class Husk:
             self.move = False
             self.frame = 0
             
+        if ingame.knight.attack == False:
+            self.damage_count = False
+            
     def draw(self):
         if ingame.collide_box:
             draw_rectangle(*self.get_bb())
+            self.font.draw(self.x, self.y + 80, f'(HP: {self.hp})', (255, 255, 0))
+            
         if self.dir == 1:
             if self.dead:
-                self.image_r.clip_draw(975 - int(self.frame) * 140, 0, 140, 120, self.x, self.y)
+                self.image_r.clip_draw(975 - int(self.frame) * 140, 0, 140, 120, self.x, self.y - 5)
             elif self.turn:
                 self.image_r.clip_draw(1009 - int(self.frame) * 105, 715, 105, 128, self.x, self.y)
             elif self.find:
@@ -247,7 +297,7 @@ class Husk:
                 
         elif self.dir == -1:
             if self.dead:
-                self.image_l.clip_draw(int(self.frame) * 140, 0, 140, 120, self.x, self.y)
+                self.image_l.clip_draw(int(self.frame) * 140, 0, 140, 120, self.x, self.y - 5)
             elif self.turn:
                 self.image_l.clip_draw(int(self.frame) * 105 + 5, 715, 105, 128, self.x, self.y)
             elif self.find:
@@ -263,8 +313,12 @@ class Husk:
         return self.x - 50, self.y - 60, self.x + 50, self.y + 60
     
     def handle_collision(self, other, group):
-        pass
-
+        if group == 'spike:husk' and self.dead == False:
+            if self.damage_count == False:
+                self.hp -= 1
+                self.damage_count = True
+                self.damage = True
+    
 class Vengefly:
     image_l = None
     image_r = None
@@ -282,6 +336,8 @@ class Vengefly:
         self.range_x1, self.range_x2 = 0, 0
         self.find = False
         self.attack = False
+        self.damage = False
+        self.damage_back = 3
         self.hp = 2
         self.gravity = 0
         self.dead = False
@@ -308,6 +364,11 @@ class Vengefly:
                 if self.y <= BOTTOM:
                     self.dead_back -= 1
                     self.gravity = 0
+                    
+        elif self.damage:
+            if self.damage_back > 0:
+                self.x += self.dir * -5
+                self.damage_back -= 1
                 
         elif self.turn:
             if self.x < self.range_x1:
@@ -329,9 +390,12 @@ class Vengefly:
                 
         elif self.move:
             self.frame = (self.frame + 5 * ACTION_PER_TIME * game_framework.frame_time) % 5
-            self.x += self.dir * 3
+            self.x += self.dir * 5
             
-        if self.find:
+        if self.dead:
+            pass
+        
+        elif self.find:
             self.move = False
             if self.attack == False:
                 
@@ -359,9 +423,9 @@ class Vengefly:
                 self.dir_y = 1
                 
             
-            self.x += self.dir * 3
+            self.x += self.dir * 6
             if self.x + (300 * self.dir) < ingame.knight.x and self.y - 40 > BOTTOM:
-                self.y += self.dir_y * 1.5
+                self.y += self.dir_y * 4.5
             
         # attack range
         if self.find == False and self.attack == False:
@@ -412,8 +476,18 @@ class Vengefly:
     def get_bb(self):
         return self.x - 50, self.y - 60, self.x + 60, self.y + 70
     
+    dmg = False
+    
     def handle_collision(self, other, group):
-        pass
+        if self.dead == False:
+            if group == 'spike:vengefly':
+                if ingame.knight.attack:
+                    if self.damage == False:
+                        self.hp -= 1
+                        self.damage = True
+                else:
+                    self.damage = False
+                    self.damage_back = 3
                 
 def range_check(self):
     

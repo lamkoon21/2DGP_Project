@@ -13,6 +13,7 @@ RIGHT = 1880
 
 floor = None
 knight = None
+spike = None
 soul = None
 crawlids = []
 husks = []
@@ -64,17 +65,20 @@ def enter():
     
     set_crawlid(1700, BOTTOM, 1000, RIGHT)
     set_husk(1400, BOTTOM, 900, 1600)
-    set_vengefly(1400, 750, 1000, 1700)
+    # set_vengefly(1400, 750, 1000, 1700)
     game_world.add_objects(crawlids, 1)
     game_world.add_objects(husks, 1)
-    game_world.add_objects(vengeflies, 1)
+    # game_world.add_objects(vengeflies, 1)
     
     set_knight(400, BOTTOM)
     
     game_world.add_collision_pairs(knight, crawlids, 'knight:crawlid')
     game_world.add_collision_pairs(knight, husks, 'knight:husk')
     game_world.add_collision_pairs(knight, vengeflies, 'knight:vengefly')
-    game_world.add_collision_pairs(knight, floor, 'knight:floor')
+    game_world.add_collision_pairs(spike, crawlids, 'spike:crawlid')
+    game_world.add_collision_pairs(spike, husks, 'spike:husk')
+    game_world.add_collision_pairs(spike, vengeflies, 'spike:vengefly')
+    # game_world.add_collision_pairs(knight, floor, 'knight:floor')
     
 def exit():
     game_world.clear()
@@ -85,7 +89,7 @@ def update():
         
     for a, b, group in game_world.all_collision_pairs():
         if collide(a, b):
-            # print('COLLISION', group)
+            print('COLLISION', group)
             a.handle_collision(b, group)
             b.handle_collision(a, group)
     
@@ -124,14 +128,13 @@ def set_vengefly(x, y, x1, x2):
     vengeflies[-1].range_x2 = x2
     
 def set_knight(x, y):
-    global knight, soul
+    global knight, soul, spike
     knight = player.Knight()
     knight.x = x
     knight.y = y
     soul = ui_soul.Soul()
     soul.hp = knight.hp
     soul.soul = knight.soul
-    
     game_world.add_object(knight, 1)
     game_world.add_object(soul, 2)
     
