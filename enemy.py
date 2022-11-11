@@ -27,7 +27,7 @@ class Crawlid:
             Crawlid.image_l = load_image('image/enemy/Crawlid_L.png')
         if  Crawlid.image_r == None:
             Crawlid.image_r = load_image('image/enemy/Crawlid_R.png')
-        self.font = load_font('ENCR10B.TTF', 16)
+        self.font = load_font('font.ttf', 16)
         self.turn = False
         self.move = True
         self.attack = False
@@ -141,7 +141,7 @@ class Husk:
             Husk.image_l = load_image('image/enemy/Husk_L.png')
         if Husk.image_r == None:
             Husk.image_r = load_image('image/enemy/Husk_R.png')
-        self.font = load_font('ENCR10B.TTF', 16)
+        self.font = load_font('font.ttf', 16)
         self.turn = False
         self.move = True
         self.range_x1, self.range_x2 = None, None
