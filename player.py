@@ -27,8 +27,9 @@ class Knight:
         self.face_dir = 1
         self.image_l = load_image('image/knight/knight_L.png')
         self.image_r = load_image('image/knight/knight_R.png')
-        self.fall = False
+        self.idle = False
         self.move = False
+        self.fall = False
         self.jump = False
         self.dash = False
         self.attack = False
@@ -37,6 +38,8 @@ class Knight:
         self.damage = False
         self.no_dmg = False
         self.dead = False
+        self.map_open = False
+        self.map_close = False
         
         self.damage_time = 100
         self.no_dmg_time = 200
@@ -58,11 +61,23 @@ class Knight:
                 self.face_dir = self.dir
                 self.damage_time = 100
                 self.dash = False
+                self.dash_count = 0
                 self.jump = False
                 self.fall = False
                 self.attack = False
                 self.damage = False
                 self.no_dmg = True
+                
+        elif self.map_open:
+            if int(self.frame) < 4:
+                self.frame = (self.frame + 4 * ACTION_PER_TIME * game_framework.frame_time * 2) % 5
+        
+        elif self.map_close:
+            if int(self.frame) < 7:
+                self.frame = (self.frame + 4 * ACTION_PER_TIME * game_framework.frame_time * 2) % 5 + 3
+            else:
+                self.map_close = False
+                self.frame = 0
                 
         elif self.attack:
             if self.attack_2:
@@ -154,6 +169,13 @@ class Knight:
                         self.frame = 0
                         self.dash = False
                         self.dash_count = 0
+                        
+        if self.move == False and self.fall == False and self.jump == False \
+            and self.dash == False and self.attack == False and self.attack_2 == False \
+            and self.attack_count == False and self.damage == False and self.dead == False:
+                self.idle = True
+        else:
+            self.idle = False
             
         # range
         if self.x > RIGHT:
@@ -172,43 +194,60 @@ class Knight:
         elif self.y > TOP:
             self.y = TOP
             self.fall = True
-            
+
+
+   
     def draw(self):
         if self.face_dir == 1:
             if self.damage:
                 self.image_r.clip_draw(5, 560, 130, 130, self.x, self.y)
             elif self.attack:
-                self.image_r.clip_draw(int(self.frame) * 128 + 10, 415, 125, 130, self.x - 20, self.y)
+                self.image_r.clip_draw(int(self.frame) * 128 + 10, 415, 126, 130, self.x - 20, self.y)
             elif self.fall:
-                self.image_r.clip_draw(int(self.frame) * 128 + 10, 145, 100, 120, self.x, self.y)        
+                self.image_r.clip_draw(int(self.frame) * 128 + 10, 145, 101, 120, self.x, self.y)        
             elif self.dash:
-                self.image_r.clip_draw(int(self.frame) * 280, 290, 280, 125, self.x - 95, self.y)
+                self.image_r.clip_draw(int(self.frame) * 280, 290, 280, 126, self.x - 95, self.y)
             elif self.jump:
-                self.image_r.clip_draw(int(self.frame) * 128 + 10, 145, 100, 120, self.x, self.y)
+                self.image_r.clip_draw(int(self.frame) * 128 + 10, 145, 101, 120, self.x, self.y)
+            elif self.map_open:
+                self.image_r.clip_draw(int(self.frame) * 128 + 10, 898, 101, 120, self.x, self.y)
+            elif self.map_close:
+                self.image_r.clip_draw(int(self.frame) * 128 + 10, 898, 101, 120, self.x, self.y)
             elif self.move:
-                self.image_r.clip_draw(int(self.frame) * 128 + 138, 15, 100, 120, self.x, self.y)
+                self.image_r.clip_draw(int(self.frame) * 128 + 138, 15, 101, 120, self.x, self.y)
+            elif self.idle:
+                self.image_r.clip_draw(10, 15, 101, 120, self.x, self.y)    
             else:
-                self.image_r.clip_draw(10, 15, 100, 120, self.x, self.y)
+                self.image_r.clip_draw(10, 15, 101, 120, self.x, self.y)
                 
         elif self.face_dir == -1:
             if self.damage:
                 self.image_r.clip_composite_draw(5, 560, 130, 130, 0, 'h', self.x, self.y, 130, 130)
             elif self.attack:
-                self.image_l.clip_draw(3180 - 10 - int(self.frame) * 128, 415, 125, 130, self.x + 40, self.y)
+                self.image_l.clip_draw(3180 - 10 - int(self.frame) * 128, 415, 126, 130, self.x + 40, self.y)
             elif self.fall:
-                self.image_l.clip_draw(3180 - 10 - int(self.frame) * 128, 145, 100, 120, self.x, self.y)
+                self.image_l.clip_draw(3180 - 10 - int(self.frame) * 128, 145, 101, 120, self.x, self.y)
             elif self.dash:
-                self.image_l.clip_draw(3025 - int(self.frame) * 280, 290, 280, 125, self.x + 120, self.y)
+                self.image_l.clip_draw(3025 - int(self.frame) * 280, 290, 280, 126, self.x + 120, self.y)
             elif self.jump:
-                self.image_l.clip_draw(3180 - 10 - int(self.frame) * 128, 145, 100, 120, self.x, self.y)
+                self.image_l.clip_draw(3180 - 10 - int(self.frame) * 128, 145, 101, 120, self.x, self.y)
+            elif self.map_open:
+                self.image_r.clip_draw(int(self.frame) * 128 + 10, 898, 101, 120, self.x, self.y)
+            elif self.map_close:
+                self.image_r.clip_draw(int(self.frame) * 128 + 10, 898, 101, 120, self.x, self.y)
             elif self.move:
-                self.image_l.clip_draw(3180 - 138 - int(self.frame) * 128, 15, 100, 120, self.x, self.y)
+                self.image_l.clip_draw(3180 - 138 - int(self.frame) * 128, 15, 101, 120, self.x, self.y)
+            elif self.idle:
+                self.image_l.clip_draw(3170, 15, 101, 120, self.x, self.y)
             else:
-                self.image_l.clip_draw(3170, 15, 100, 120, self.x, self.y)
+                self.image_l.clip_draw(3170, 15, 101, 120, self.x, self.y)
         
         if ingame.collide_box:
                 draw_rectangle(*self.get_bb())
-    
+
+
+
+
     def handle_events(self, event):
         if event.type == SDL_KEYDOWN:
                 if event.key != pico2d.SDLK_x:

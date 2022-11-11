@@ -28,18 +28,18 @@ def update():
     ingame.knight.update()
     ingame.soul.update()
     
-    for crawlid in ingame.crawlids:
-        crawlid.update()
+    # for crawlid in ingame.crawlids:
+    #     crawlid.update()
     
-    for husk in ingame.husks:
-        husk.update()
-        husk.find_x = ingame.knight.x
-        husk.find_y = ingame.knight.y
+    # for husk in ingame.husks:
+    #     husk.update()
+    #     husk.find_x = ingame.knight.x
+    #     husk.find_y = ingame.knight.y
     
-    for vengefly in ingame.vengeflies:
-        vengefly.update()
-        vengefly.find_x = ingame.knight.x
-        vengefly.find_y = ingame.knight.y
+    # for vengefly in ingame.vengeflies:
+    #     vengefly.update()
+    #     vengefly.find_x = ingame.knight.x
+    #     vengefly.find_y = ingame.knight.y
 
 def draw():
     clear_canvas()
@@ -49,18 +49,13 @@ def draw():
 def handle_events():
     events = get_events()
     for event in events:
-        if event.type == SDL_KEYDOWN:
-            ingame.knight.move = False
-            ingame.knight.dash = False
-            ingame.knight.attack = False
-            ingame.knight.jump = False
-            ingame.knight.fall = False
-            ingame.knight.attack_2 = False
-            ingame.knight.idle = True
-            
-        if event.type == SDL_KEYUP:
-            if event.key == pico2d.SDLK_TAB:
-                game_framework.pop_state()
+        if (event.type, event.key) == (SDL_KEYUP, pico2d.SDLK_TAB):
+            ingame.knight.frame = 0
+            ingame.knight.map_open = False
+            ingame.knight.map_close = True
+            game_framework.pop_state()
+        else:
+            ingame.knight.handle_events(event)
 
 def pause():
     global map

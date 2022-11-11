@@ -50,7 +50,16 @@ def handle_events():
         elif (event.type, event.key) == (SDL_KEYDOWN, SDLK_ESCAPE):
             game_framework.quit()
         elif (event.type, event.key) == (SDL_KEYDOWN, SDLK_TAB):
-            game_framework.push_state(ui_map)
+            if knight.idle:
+                knight.frame = 0
+                knight.jump = False
+                knight.fall = False
+                knight.dash = False
+                knight.attack = False
+                knight.attack_2 = False
+                knight.damage = False
+                knight.map_open = True
+                game_framework.push_state(ui_map)
         elif (event.type, event.key) == (SDL_KEYDOWN, SDLK_EQUALS):
             if collide_box: collide_box = False
             else: collide_box = True
