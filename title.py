@@ -1,14 +1,8 @@
 from pico2d import *
+from constant_value import *
 import game_framework
 import ingame
-
-PIXEL_PER_METER = (10.0 / 0.3)
-RUN_SPEED_KMPH = 15.0
-RUN_SPEED_MPM = (RUN_SPEED_KMPH * 1000.0 / 60.0)
-RUN_SPEED_MPS = (RUN_SPEED_MPM / 60.0)
-RUN_SPEED_PPS = (RUN_SPEED_MPS * PIXEL_PER_METER)
-TIME_PER_ACTION = 0.5
-ACTION_PER_TIME = 1.0 / TIME_PER_ACTION
+import ui_control
 
 class Title:
     def __init__(self):
@@ -16,13 +10,11 @@ class Title:
         self.background = load_image('image/title/title_background.png')
         self.logo = load_image('image/title/title_name.png')
         self.pointer = load_image('image/title/title_pointer.png')
+        self.control = load_image('image/title/control.png')
         self.font = load_font('font.ttf', 50)
         self.bgm = load_music('music/bgm/title.wav')
         self.select = load_music('music/ui/title_select.wav')
         self.confirm = load_music('music/ui/ui_confirm.wav')
-        self.bgm.set_volume(128)
-        self.select.set_volume(128)
-        self.confirm.set_volume(128)
         self.bgm.repeat_play()
     
     def update(self):
@@ -82,7 +74,7 @@ def handle_events():
                                 delay(1.3)
                                 game_framework.change_state(ingame)
                             case 2:
-                                pass
+                                game_framework.push_state(ui_control)
                             case 3:
                                 game_framework.quit()
                                     
