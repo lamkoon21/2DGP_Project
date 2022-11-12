@@ -56,9 +56,9 @@ def enter():
     floor = back_floor.Floor()
     game_world.add_object(floor, 0)
     
-    set_crawlid(1700, BOTTOM, 1200, RIGHT)
+    set_crawlid(1700, BOTTOM, 1000, RIGHT)
     set_husk(1400, BOTTOM, 900, 1600)
-    set_vengefly(1400, 750, 1000, 1700)
+    set_vengefly(1600, 750, 1200, 1700)
     game_world.add_objects(crawlids, 1)
     game_world.add_objects(husks, 1)
     game_world.add_objects(vengeflies, 1)
