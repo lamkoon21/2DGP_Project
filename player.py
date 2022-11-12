@@ -290,18 +290,22 @@ class Knight:
                     case pico2d.SDLK_LEFT:     # left
                         if self.move == False:
                             self.dir = -1
-                            if self.damage == False: self.face_dir = self.dir
+                            if self.damage == False: 
+                                self.face_dir = self.dir
+                                if self.y == BOTTOM:
+                                    self.move_sound.repeat_play()
                             self.move = True
-                            self.move_sound.repeat_play()
                         else:
                             self.move = False
                             self.move_sound.stop()
                     case pico2d.SDLK_RIGHT:    # right
                         if self.move == False:
                             self.dir = 1
-                            if self.damage == False: self.face_dir = self.dir
+                            if self.damage == False: 
+                                self.face_dir = self.dir
+                                if self.y == BOTTOM:
+                                    self.move_sound.repeat_play()
                             self.move = True
-                            self.move_sound.repeat_play()
                         else:
                             self.move = False
                             self.move_sound.stop()
@@ -310,13 +314,15 @@ class Knight:
                             if self.frame != 0:
                                 self.frame = 0
                             self.jump = True
-                            self.jump_sound.play()
+                            if self.damage == False: 
+                                self.jump_sound.play()
                     case pico2d.SDLK_x:        # attack
                         if self.attack == False and self.dash == False:
                             if self.frame != 0:
                                 self.frame = 0
                             self.attack = True
-                            Knight.attack_sound(self)
+                            if self.damage == False: 
+                                Knight.attack_sound(self)
                     case pico2d.SDLK_c:        # dash
                         if self.dash == False:
                             if self.dash_count < 1:
@@ -326,7 +332,8 @@ class Knight:
                                 self.fall = False
                                 self.dash_count += 1
                                 self.dash = True
-                                self.dash_sound.play()
+                                if self.damage == False: 
+                                    self.dash_sound.play()
                     case pico2d.SDLK_a:
                         if self.idle or self.move:
                             if self.heal == False:
@@ -341,18 +348,22 @@ class Knight:
                             self.move_sound.stop()
                         else:
                             self.dir = 1
-                            if self.damage == False: self.face_dir = self.dir
+                            if self.damage == False: 
+                                self.face_dir = self.dir
+                                if self.y == BOTTOM:
+                                    self.move_sound.repeat_play()
                             self.move = True
-                            self.move_sound.repeat_play()
                     case pico2d.SDLK_RIGHT:    # right
                         if self.move == True:
                             self.move = False
                             self.move_sound.stop()
                         else:
                             self.dir = -1
-                            if self.damage == False: self.face_dir = self.dir
+                            if self.damage == False: 
+                                self.face_dir = self.dir
+                                if self.y == BOTTOM:
+                                    self.move_sound.repeat_play()
                             self.move = True
-                            self.move_sound.repeat_play()
                     case pico2d.SDLK_z:
                         if self.jump == True and self.gravity < FALL_G:
                             if self.gravity < 5:

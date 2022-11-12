@@ -27,9 +27,9 @@ class Crawlid:
             Crawlid.image_l = load_image('image/enemy/Crawlid_L.png')
         if  Crawlid.image_r == None:
             Crawlid.image_r = load_image('image/enemy/Crawlid_R.png')
-        # self.move_sound = load_music('music/enemy/crawlid.wav')
-        # self.death_sound = load_music('music/enemy/enemy_death.wav')
-        # self.move_sound.set_volume(80)
+        self.move_sound = load_music('music/enemy/crawlid.wav')
+        self.death_sound = load_music('music/enemy/enemy_death.wav')
+        self.move_sound.set_volume(80)
         self.sound_play = False
         self.font = load_font('font.ttf', 16)
         self.turn = False
@@ -50,7 +50,7 @@ class Crawlid:
                 self.frame = (self.frame + 2 * ACTION_PER_TIME * game_framework.frame_time) % 2
                 
             if self.dead_back == None:
-                # self.death_sound.play()
+                self.death_sound.play()
                 if self.y > BOTTOM:
                     self.gravity += 0.5
                     self.y -= self.gravity
@@ -152,12 +152,12 @@ class Husk:
             Husk.image_l = load_image('image/enemy/Husk_L.png')
         if Husk.image_r == None:
             Husk.image_r = load_image('image/enemy/Husk_R.png')
-        # self.move_sound = load_music('music/enemy/husk_step.wav')
-        # self.attack_sound = load_music('music/enemy/husk_chase.wav')
-        # self.find_sound = load_music('music/enemy/husk_find.wav')
-        # self.death_sound1 = load_music('music/enemy/enemy_death.wav')
-        # self.death_sound2 = load_music('music/enemy/husk_death.wav')
-        # self.move_sound.set_volume(80)
+        self.move_sound = load_music('music/enemy/husk_step.wav')
+        self.attack_sound = load_music('music/enemy/husk_chase.wav')
+        self.find_sound = load_music('music/enemy/husk_find.wav')
+        self.death_sound1 = load_music('music/enemy/enemy_death.wav')
+        self.death_sound2 = load_music('music/enemy/husk_death.wav')
+        self.move_sound.set_volume(80)
         self.move_play = False
         self.find_play = False
         self.attack_play = False
@@ -207,7 +207,7 @@ class Husk:
                     self.y = BOTTOM
                     self.gravity = 0
                     self.dead_back = 3
-                # self.death_sound1.play()
+                self.death_sound1.play()
                 # self.death_sound2.play()
             elif self.dead_back > 0:
                 self.x += (self.dead_back * 2)
@@ -389,13 +389,14 @@ class Vengefly:
             
             if self.dead_back == None:
                 if self.y > BOTTOM:
-                    self.gravity += 1
+                    self.gravity += 0.5
                     self.y -= self.gravity
+                    self.dead_back = 3
                 else:
                     self.y = BOTTOM
                     self.gravity = 0
                     self.dead_back = 3
-                # self.death_sound.play()
+                self.death_sound.play()
             elif self.dead_back > 0:
                 self.x += (self.dead_back * 2)
                 self.gravity += 1
