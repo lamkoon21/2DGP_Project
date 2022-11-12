@@ -71,7 +71,10 @@ def enter():
     game_world.add_collision_pairs(spike, crawlids, 'spike:crawlid')
     game_world.add_collision_pairs(spike, husks, 'spike:husk')
     game_world.add_collision_pairs(spike, vengeflies, 'spike:vengefly')
-    # game_world.add_collision_pairs(knight, floor, 'knight:floor')
+    game_world.add_collision_pairs(knight, floor, 'knight:floor')
+    game_world.add_collision_pairs(crawlids, floor, 'knight:floor')
+    game_world.add_collision_pairs(husks, floor, 'knight:floor')
+    game_world.add_collision_pairs(vengeflies, floor, 'knight:floor')
     
 def exit():
     game_world.clear()
