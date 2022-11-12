@@ -27,6 +27,10 @@ class Crawlid:
             Crawlid.image_l = load_image('image/enemy/Crawlid_L.png')
         if  Crawlid.image_r == None:
             Crawlid.image_r = load_image('image/enemy/Crawlid_R.png')
+        # self.move_sound = load_music('music/enemy/crawlid.wav')
+        # self.death_sound = load_music('music/enemy/enemy_death.wav')
+        # self.move_sound.set_volume(80)
+        self.sound_play = False
         self.font = load_font('font.ttf', 16)
         self.turn = False
         self.move = True
@@ -44,8 +48,9 @@ class Crawlid:
             self.hp = -1
             if int(self.frame) < 1:
                 self.frame = (self.frame + 2 * ACTION_PER_TIME * game_framework.frame_time) % 2
-            
+                
             if self.dead_back == None:
+                # self.death_sound.play()
                 if self.y > BOTTOM:
                     self.gravity += 0.5
                     self.y -= self.gravity
@@ -81,6 +86,12 @@ class Crawlid:
                 self.dir *= -1
                 
         elif self.move:
+            if ingame.knight.x > self.x - 1000 and ingame.knight.x < self.x + 1000 and self.sound_play == False:
+                # self.move_sound.repeat_play()
+                self.sound_play = True
+            else:
+                # self.move_sound.stop()
+                pass
             self.frame = (self.frame + 4 * ACTION_PER_TIME * game_framework.frame_time) % 4
             self.x += self.dir * 5
                 
@@ -141,6 +152,15 @@ class Husk:
             Husk.image_l = load_image('image/enemy/Husk_L.png')
         if Husk.image_r == None:
             Husk.image_r = load_image('image/enemy/Husk_R.png')
+        # self.move_sound = load_music('music/enemy/husk_step.wav')
+        # self.attack_sound = load_music('music/enemy/husk_chase.wav')
+        # self.find_sound = load_music('music/enemy/husk_find.wav')
+        # self.death_sound1 = load_music('music/enemy/enemy_death.wav')
+        # self.death_sound2 = load_music('music/enemy/husk_death.wav')
+        # self.move_sound.set_volume(80)
+        self.move_play = False
+        self.find_play = False
+        self.attack_play = False
         self.font = load_font('font.ttf', 16)
         self.turn = False
         self.move = True
@@ -187,6 +207,8 @@ class Husk:
                     self.y = BOTTOM
                     self.gravity = 0
                     self.dead_back = 3
+                # self.death_sound1.play()
+                # self.death_sound2.play()
             elif self.dead_back > 0:
                 self.x += (self.dead_back * 2)
                 self.gravity += 0.5
@@ -196,6 +218,12 @@ class Husk:
                     self.gravity = 0
                 
         elif self.move:
+            if ingame.knight.x > self.x - 1000 and ingame.knight.x < self.x + 1000 and self.move_play == False:
+                # self.move_sound.repeat_play()
+                self.move_play = True
+            else:
+                # self.move_sound.stop()
+                pass
             self.frame = (self.frame + 7 * ACTION_PER_TIME * game_framework.frame_time) % 7
             self.x += self.dir * 2
         
@@ -207,6 +235,10 @@ class Husk:
             self.damage_back -= 1
         
         elif self.find:
+            if self.find_play == False:
+                # self.find_sound.play()
+                self.find_play = True
+            
             self.move = False
             if self.attack == False:
     
@@ -237,6 +269,10 @@ class Husk:
                 self.move = True
                     
         elif self.attack:
+            if self.attack_play == False:
+                # self.attack_sound.play()
+                self.attack_play = True
+            
             self.frame = (self.frame + 4 * ACTION_PER_TIME * game_framework.frame_time) % 4
             self.x += self.dir * 5.5
             
@@ -326,6 +362,13 @@ class Vengefly:
             Vengefly.image_l = load_image('image/enemy/Vengefly_L.png')
         if Vengefly.image_r == None:
             Vengefly.image_r = load_image('image/enemy/Vengefly_R.png')
+        self.move_sound = load_music('music/enemy/vengefly_fly.wav')
+        self.find_sound = load_music('music/enemy/vengefly_find.wav')
+        self.death_sound = load_music('music/enemy/enemy_death.wav')
+        self.move_sound.set_volume(80)
+        self.font = load_font('font.ttf', 16)
+        self.move_play = False
+        self.find_play = False
         self.turn = False
         self.move = True
         self.range_x1, self.range_x2 = 0, 0
@@ -352,6 +395,7 @@ class Vengefly:
                     self.y = BOTTOM
                     self.gravity = 0
                     self.dead_back = 3
+                # self.death_sound.play()
             elif self.dead_back > 0:
                 self.x += (self.dead_back * 2)
                 self.gravity += 1
@@ -379,6 +423,10 @@ class Vengefly:
                 self.move = True
                 
         elif self.move:
+            if self.move_play == False:
+                # self.move_sound.play()
+                self.move_play = True
+                
             self.frame = (self.frame + 5 * ACTION_PER_TIME * game_framework.frame_time) % 5
             self.x += self.dir * 5
             
@@ -390,6 +438,10 @@ class Vengefly:
             self.damage_back -= 1
         
         elif self.find:
+            if self.find_play == False:
+                # self.find_sound.play()
+                self.find_play = True
+            
             self.move = False
             if self.attack == False:
                 
@@ -439,6 +491,8 @@ class Vengefly:
     def draw(self):
         if ingame.collide_box:
             draw_rectangle(*self.get_bb())
+            self.font.draw(self.x, self.y + 80, f'(HP: {self.hp})', (255, 255, 0))
+            
         if self.dir == 1:
             if self.dead:
                 self.image_r.clip_draw(455 - int(self.frame) * 150, 0, 150, 110, self.x, self.y - 25)
@@ -468,7 +522,7 @@ class Vengefly:
                 self.image_l.clip_draw(int(self.frame) * 120 + 5, 635, 115, 140, self.x, self.y)
                 
     def get_bb(self):
-        return self.x - 50, self.y - 60, self.x + 60, self.y + 70
+        return self.x - 50, self.y - 60, self.x + 50, self.y + 50
     
     dmg = False
     
