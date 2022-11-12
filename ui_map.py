@@ -1,6 +1,7 @@
 from pico2d import *
 import game_framework
 import ingame
+import game_world
 
 class Map:
     def __init__(self):
@@ -22,6 +23,7 @@ def exit():
     
 def update():
     ingame.knight, ingame.soul, ingame.husks, ingame.crawlids, ingame.vengeflies
+    
     
     ingame.soul.hp = ingame.knight.hp
     ingame.soul.soul = ingame.knight.soul
@@ -67,15 +69,8 @@ def resume():
     
 def draw_world():
     global map
-    for crawlid in ingame.crawlids:
-        crawlid.draw()
-    for husk in ingame.husks:
-        husk.draw()
-    for vengefly in ingame.vengeflies:
-        vengefly.draw()
     
-    ingame.knight.draw()
-    ingame.soul.draw()
-    ingame.floor.draw()
+    for game_object in game_world.all_objects():
+        game_object.draw()
     
     map.draw()
