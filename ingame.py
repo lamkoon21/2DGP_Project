@@ -1,15 +1,13 @@
 from pico2d import *
 import game_framework
+import game_world
 import player
 import enemy
 import ui_soul
 import ui_map
-import game_world
-
-BOTTOM = 400
-TOP = 1050
-LEFT = 50
-RIGHT = 1880
+import back_floor
+from constant_value import *
+from background import FixedBackground as Background
 
 floor = None
 knight = None
@@ -18,27 +16,9 @@ soul = None
 crawlids = []
 husks = []
 vengeflies = []
-back = None
+background = None
+bgm = None
 
-class Floor:
-    def __init__(self):
-        self.image = load_image('image/map/floor.png')
-        
-    def update(self):
-        pass 
-
-    def draw(self):
-        self.image.draw(1200, 240)
-        self.image.draw(0, 240)
-        if collide_box:
-                draw_rectangle(*self.get_bb())
-        
-    def get_bb(self):
-        return 0, 0, 1920, 340
-    
-    def handle_collision(self, other, group):
-        pass
-        
 collide_box = False
 
 def handle_events():
@@ -68,17 +48,20 @@ def handle_events():
             knight.handle_events(event)
 
 def enter():
-    global knight, floor, crawlids, husks, vengeflies, back
-    back = load_image('image/map/background.png')
-    floor = Floor()
+    global knight, floor, crawlids, husks, vengeflies, background, bgm
+    background = Background()
+    bgm = load_music('music/bgm/main.wav')
+    bgm.repeat_play()
+    game_world.add_object(background, 0)
+    floor = back_floor.Floor()
     game_world.add_object(floor, 0)
     
-    # set_crawlid(1700, BOTTOM, 1000, RIGHT)
-    # set_husk(1400, BOTTOM, 900, 1600)
-    # set_vengefly(1400, 750, 1000, 1700)
-    # game_world.add_objects(crawlids, 1)
-    # game_world.add_objects(husks, 1)
-    # game_world.add_objects(vengeflies, 1)
+    set_crawlid(1700, BOTTOM, 1200, RIGHT)
+    set_husk(1400, BOTTOM, 900, 1600)
+    set_vengefly(1400, 750, 1000, 1700)
+    game_world.add_objects(crawlids, 1)
+    game_world.add_objects(husks, 1)
+    game_world.add_objects(vengeflies, 1)
     
     set_knight(400, BOTTOM)
     
@@ -107,7 +90,6 @@ def update():
         
 def draw():
     clear_canvas()
-    back.draw(960, 540)
     draw_world()
     update_canvas()
 
