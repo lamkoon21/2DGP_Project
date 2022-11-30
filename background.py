@@ -45,9 +45,13 @@ class FixedBackground:
             case 0:
                 self.w = self.map0.w
                 self.h = self.map0.h
+                self.window_left = clamp(0, int(server.knight.x) - self.canvas_width//2, self.w - self.canvas_width - 1)
+                self.window_bottom = clamp(0, int(server.knight.y) - self.canvas_height//4, self.h - self.canvas_height - 1)
             case 1:
                 self.w = self.map1.w
                 self.h = self.map1.h
+                self.window_left = clamp(0, int(server.knight.x) - self.canvas_width//2, self.w - self.canvas_width - 1)
+                self.window_bottom = clamp(0, int(server.knight.y) - self.canvas_height//2, self.h - self.canvas_height - 1)
             case 2:
                 self.w = self.map2.w
                 self.h = self.map2.h
@@ -58,8 +62,7 @@ class FixedBackground:
                 self.w = self.map4.w
                 self.h = self.map4.h
         
-        self.window_left = clamp(0, int(server.knight.x) - self.canvas_width//2, self.w - self.canvas_width - 1)
-        self.window_bottom = clamp(0, int(server.knight.y) - self.canvas_height//2, self.h - self.canvas_height - 1)
+        
 
     def handle_event(self, event):
         pass
