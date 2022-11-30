@@ -1,8 +1,9 @@
 import pico2d
 import game_framework
-import ingame
+import stage0
+import stage1
 import title
 
 pico2d.open_canvas(1920, 1080, True, True)
-game_framework.run(title)
+game_framework.run(stage1)
 pico2d.close_canvas()

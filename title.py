@@ -1,7 +1,7 @@
 from pico2d import *
 from constant_value import *
 import game_framework
-import ingame
+import stage1
 import ui_control
 
 class Title:
@@ -13,8 +13,8 @@ class Title:
         self.control = load_image('image/title/control.png')
         self.font = load_font('font.ttf', 50)
         self.bgm = load_music('music/bgm/title.wav')
-        self.select = load_music('music/ui/title_select.wav')
-        self.confirm = load_music('music/ui/ui_confirm.wav')
+        self.select = load_wav('music/ui/title_select.wav')
+        self.confirm = load_wav('music/ui/ui_confirm.wav')
         self.bgm.repeat_play()
     
     def update(self):
@@ -71,8 +71,8 @@ def handle_events():
                         input = False
                         match select:
                             case 1:
-                                delay(1.3)
-                                game_framework.change_state(ingame)
+                                # delay(1.3)
+                                game_framework.change_state(stage1)
                             case 2:
                                 game_framework.push_state(ui_control)
                             case 3:
