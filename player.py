@@ -1,9 +1,10 @@
 from pico2d import *
 from constant_value import *
-import ingame
+import server
 import game_framework
 import game_world
 import random
+from wall import Wall
 
 
 class Knight:
@@ -17,19 +18,19 @@ class Knight:
         self.dash_effect = load_image('image/knight/dash_effect.png')
         self.attack_effect = load_image('image/knight/attack_effect.png')
         self.no_damage = load_image('image/knight/no_damage.png')
-        self.move_sound = load_music('music/knight/step.wav')
+        self.move_sound = load_wav('music/knight/step.wav')
         self.move_sound.set_volume(80)
-        self.jump_sound = load_music('music/knight/jump.wav')
-        self.fall_sound = load_music('music/knight/falling.wav')
-        self.land_sound = load_music('music/knight/land.wav')
-        self.dash_sound = load_music('music/knight/dash.wav')
-        self.damage_sound = load_music('music/knight/damage.wav')
-        self.attack_sound1 = load_music('music/knight/sword_1.wav')
-        self.attack_sound2 = load_music('music/knight/sword_2.wav')
-        self.attack_sound3 = load_music('music/knight/sword_3.wav')
-        self.attack_sound4 = load_music('music/knight/sword_4.wav')
-        self.attack_sound5 = load_music('music/knight/sword_5.wav')
-        self.hit_sound = load_music('music/enemy/enemy_damage.wav')
+        self.jump_sound = load_wav('music/knight/jump.wav')
+        self.fall_sound = load_wav('music/knight/falling.wav')
+        self.land_sound = load_wav('music/knight/land.wav')
+        self.dash_sound = load_wav('music/knight/dash.wav')
+        self.damage_sound = load_wav('music/knight/damage.wav')
+        self.attack_sound1 = load_wav('music/knight/sword_1.wav')
+        self.attack_sound2 = load_wav('music/knight/sword_2.wav')
+        self.attack_sound3 = load_wav('music/knight/sword_3.wav')
+        self.attack_sound4 = load_wav('music/knight/sword_4.wav')
+        self.attack_sound5 = load_wav('music/knight/sword_5.wav')
+        self.hit_sound = load_wav('music/enemy/enemy_damage.wav')
         self.idle = False
         self.move = False
         self.fall = False
@@ -45,6 +46,11 @@ class Knight:
         self.map_close = False
         self.heal = False
         
+        self.collide_bottom = False
+        self.collide_top = False
+        self.collide_left = False
+        self.collide_right = False
+        
         self.damage_time = 100
         self.no_dmg_time = 200
         
@@ -53,15 +59,17 @@ class Knight:
         self.gravity = 0.0
         self.hp = 5
         self.soul = 0
+        self.boss_key = 0
     
     def update(self):
+        
         # action status
         if self.damage:
             self.damage_time -= 1
             if self.damage_time == 0:
                 self.frame = 0
-                if self.y > BOTTOM: self.gravity = FALL_G
-                else: self.gravity = 0
+                # if self.y > bottom: self.gravity = FALL_G
+                # else: self.gravity = 0
                 self.face_dir = self.dir
                 self.damage_time = 100
                 self.dash = False
@@ -111,6 +119,7 @@ class Knight:
                     
             if self.move:
                 self.x += self.dir * 6
+                self.face_dir = self.dir
             
             if self.fall or self.jump:
                 self.gravity += G
@@ -127,7 +136,8 @@ class Knight:
                 
             if self.move:
                 self.x += self.dir * 6
-                        
+                self.face_dir = self.dir
+                
             self.gravity += G
             self.y += (FALL_G - self.gravity)
                 
@@ -139,6 +149,7 @@ class Knight:
                 
             if self.move:
                 self.x += self.dir * 6
+                self.face_dir = self.dir
                 
             if self.y + (FALL_G - self.gravity) > 0:
                 self.gravity += G
@@ -146,7 +157,7 @@ class Knight:
             else:
                 self.jump = False
                 self.fall = True
-                self.fall_sound.play()
+                # self.fall_sound.play()
         
         elif self.heal:
             if self.dead == False and self.soul > 2 and self.hp < 5:
@@ -158,6 +169,7 @@ class Knight:
             if self.dash == False:
                 self.frame = (self.frame + 8 * ACTION_PER_TIME * game_framework.frame_time) % 8
                 self.x += self.dir * 6
+                self.face_dir = self.dir
                 
         if self.dash:
             if self.damage == False:
@@ -165,21 +177,14 @@ class Knight:
             
                 if int(self.frame) < 10 and self.fall == False:
                     self.frame = (self.frame + 11 * ACTION_PER_TIME * game_framework.frame_time) % 11
-                    self.x += int(self.dir * (-((int(self.frame) % 11) - 3) ** 2 + 40) * 0.6)
-                else:
-                    if self.y > BOTTOM:
-                        if self.fall == False:
-                            self.frame = 0
-                            self.gravity = FALL_G
-                            self.fall = True
-                    if self.y <= BOTTOM:
-                        self.frame = 0
-                        self.dash = False
-                        self.dash_count = 0
+                    self.x += int(self.face_dir * (-((int(self.frame) % 11) - 3) ** 2 + 40) * 0.6)
+                elif int(self.frame) == 10:
+                    self.dash = False
+                        
                         
         if self.move == False and self.fall == False and self.jump == False \
             and self.dash == False and self.attack == False and self.attack_2 == False \
-            and self.attack_count == False and self.damage == False and self.dead == False:
+            and self.damage == False and self.dead == False:
                 self.idle = True
         else:
             self.idle = False
@@ -189,94 +194,83 @@ class Knight:
             if self.no_dmg_time == 0:
                 self.no_dmg = False
                 self.no_dmg_time = 200
-            
-        # range
-        if self.x > RIGHT:
-            self.x = RIGHT
-        elif self.x < LEFT:
-            self.x = LEFT
-            
-        if self.y < BOTTOM:
-            self.frame = 0
-            self.gravity = 0
-            self.y = BOTTOM
-            self.fall = False
-            self.jump = False
-            self.fall_sound.stop()
-            self.land_sound.play()
-        elif self.y > BOTTOM and self.dash == False:
-            self.fall = True
-        elif self.y > TOP:
-            self.y = TOP
-            self.fall = True
-            if self.all == False:
-                self.fall_sound.play()
-            
+                
+        if self.dash == False and self.jump == False:
+            if self.collide_bottom == False and self.collide_top == False:
+                if self.fall == False:
+                    self.gravity = FALL_G
+                self.fall = True
+            else:
+                if self.fall == False:
+                    self.dash_count = 0
+                self.fall = False
+                
 
+        
    
     def draw(self):
-        cx, cy = self.x - ingame.background.window_left, self.y - ingame.background.window_bottom
+        cx, cy = self.x - server.background.window_left, self.y - server.background.window_bottom
         
         if self.face_dir == 1:
             if self.damage:
                 self.image_r.clip_draw(5, 560, 130, 130, cx, cy)
             elif self.attack:
-                self.image_r.clip_draw(int(self.frame) * 128 + 10, 415, 120, 130, cx - 20, cy)
+                self.image_r.clip_draw(int(self.frame) * 128 + 10, 415, 120, 130, cx - 20, cy, 120 * ex, 130 * ex)
                 if int(self.frame) < 2 or 5 < int(self.frame) < 7:
-                    self.attack_effect.clip_composite_draw(0, 0, 160, 120, 0, 'h', cx + self.face_dir * 80, cy, 220, 165)
+                    self.attack_effect.clip_composite_draw(0, 0, 160, 120, 0, 'h', cx + self.face_dir * 80, cy, 220 * ex, 165 * ex)
                 elif int(self.frame) < 4 or 5 < int(self.frame) < 9:
-                    self.attack_effect.clip_composite_draw(160, 0, 140, 120, 0, 'h', cx + self.face_dir * 80, cy, 220, 165)
+                    self.attack_effect.clip_composite_draw(160, 0, 140, 120, 0, 'h', cx + self.face_dir * 80, cy, 220 * ex, 165 * ex)
             elif self.fall:
-                self.image_r.clip_draw(int(self.frame) * 128 + 10, 145, 101, 120, cx, cy)        
+                self.image_r.clip_draw(int(self.frame) * 128 + 10, 145, 101, 120, cx, cy, 101 * ex, 120 * ex)        
             elif self.dash:
-                self.image_r.clip_draw(int(self.frame) * 280, 290, 280, 126, cx - 95, cy)
+                self.image_r.clip_draw(int(self.frame) * 280, 290, 280, 126, cx - 95, cy, 280 * ex, 126 * ex)
                 if 0 < int(self.frame) < 6:
-                    self.dash_effect.clip_composite_draw(int(self.frame) * 360, 0, 360, 220, 0, 'h', cx + self.face_dir * - 200, cy - 20, 360, 220)
+                    self.dash_effect.clip_composite_draw(int(self.frame) * 360, 0, 360, 220, 0, 'h', cx + self.face_dir * - 200, cy - 20, 360 * ex, 220 * ex)
             elif self.jump:
-                self.image_r.clip_draw(int(self.frame) * 128 + 10, 145, 101, 120, cx, cy)
+                self.image_r.clip_draw(int(self.frame) * 128 + 10, 145, 101, 120, cx, cy, 101 * ex, 120 * ex)
             elif self.map_open:
-                self.image_r.clip_draw(int(self.frame) * 128 + 10, 898, 101, 120, cx, cy)
+                self.image_r.clip_draw(int(self.frame) * 128 + 10, 898, 101, 120, cx, cy, 101 * ex, 120 * ex)
             elif self.map_close:
-                self.image_r.clip_draw(int(self.frame) * 128 + 10, 898, 101, 120, cx, cy)
+                self.image_r.clip_draw(int(self.frame) * 128 + 10, 898, 101, 120, cx, cy, 101 * ex, 120 * ex)
             elif self.move:
-                self.image_r.clip_draw(int(self.frame) * 128 + 138, 15, 101, 120, cx, cy)
+                self.image_r.clip_draw(int(self.frame) * 128 + 138, 15, 101, 120, cx, cy, 101 * ex, 120 * ex)
             elif self.idle:
-                self.image_r.clip_draw(10, 15, 101, 120, cx, cy)    
+                self.image_r.clip_draw(10, 15, 101, 120, cx, cy, 101 * ex, 120 * ex)    
             else:
-                self.image_r.clip_draw(10, 15, 101, 120, cx, cy)
+                self.image_r.clip_draw(10, 15, 101, 120, cx, cy, 101 * ex, 120 * ex)
                 
         elif self.face_dir == -1:
             if self.damage:
                 self.image_r.clip_composite_draw(5, 560, 130, 130, 0, 'h', cx, cy, 130, 130)
             elif self.attack:
-                self.image_l.clip_draw(3180 - 10 - int(self.frame) * 128, 415, 120, 130, cx + 40, cy)
+                self.image_l.clip_draw(3180 - 10 - int(self.frame) * 128, 415, 120, 130, cx + 40, cy, 120 * ex, 130 * ex)
                 if int(self.frame) < 2 or 5 < int(self.frame) < 7:
-                    self.attack_effect.clip_composite_draw(0, 0, 160, 120, 0, '', cx + self.face_dir * 60, cy, 220, 165)
+                    self.attack_effect.clip_composite_draw(0, 0, 160, 120, 0, '', cx + self.face_dir * 60, cy, 220 * ex, 165 * ex)
                 elif int(self.frame) < 4 or 5 < int(self.frame) < 9:
-                    self.attack_effect.clip_composite_draw(160, 0, 140, 120, 0, '', cx + self.face_dir * 60, cy, 220, 165)
+                    self.attack_effect.clip_composite_draw(160, 0, 140, 120, 0, '', cx + self.face_dir * 60, cy, 220 * ex, 165 * ex)
             elif self.fall:
-                self.image_l.clip_draw(3180 - 10 - int(self.frame) * 128, 145, 101, 120, cx, cy)
+                self.image_l.clip_draw(3180 - 10 - int(self.frame) * 128, 145, 101, 120, cx, cy, 101 * ex, 120 * ex)
             elif self.dash:
-                self.image_l.clip_draw(3025 - int(self.frame) * 280, 290, 280, 126, cx + 120, cy)
+                self.image_l.clip_draw(3025 - int(self.frame) * 280, 290, 280, 126, cx + 120, cy, 280 * ex, 126 * ex)
                 if 0 < int(self.frame) < 6:
-                    self.dash_effect.clip_composite_draw(int(self.frame) * 360, 0, 360, 220, 0, '', cx + self.face_dir * - 220, cy - 20, 360, 220)
+                    self.dash_effect.clip_composite_draw(int(self.frame) * 360, 0, 360, 220, 0, '', cx + self.face_dir * - 220, cy - 20, 360 * ex, 220 * ex)
             elif self.jump:
-                self.image_l.clip_draw(3180 - 10 - int(self.frame) * 128, 145, 101, 120, cx, cy)
+                self.image_l.clip_draw(3180 - 10 - int(self.frame) * 128, 145, 101, 120, cx, cy, 101 * ex, 120 * ex)
             elif self.map_open:
-                self.image_r.clip_draw(int(self.frame) * 128 + 10, 898, 101, 120, cx, cy)
+                self.image_r.clip_draw(int(self.frame) * 128 + 10, 898, 101, 120, cx, cy, 101 * ex, 120 * ex)
             elif self.map_close:
-                self.image_r.clip_draw(int(self.frame) * 128 + 10, 898, 101, 120, cx, cy)
+                self.image_r.clip_draw(int(self.frame) * 128 + 10, 898, 101, 120, cx, cy, 101 * ex, 120 * ex)
             elif self.move:
-                self.image_l.clip_draw(3180 - 138 - int(self.frame) * 128, 15, 101, 120, cx, cy)
+                self.image_l.clip_draw(3180 - 138 - int(self.frame) * 128, 15, 101, 120, cx, cy, 101 * ex, 120 * ex)
             elif self.idle:
-                self.image_l.clip_draw(3170, 15, 101, 120, cx, cy)
+                self.image_l.clip_draw(3170, 15, 101, 120, cx, cy , 101 * ex, 120 * ex)
             else:
-                self.image_l.clip_draw(3170, 15, 101, 120, self.x, cy)
+                self.image_l.clip_draw(3170, 15, 101, 120, cx, cy , 101 * ex, 120 * ex)
                 
         if self.no_dmg:
-            self.no_damage.clip_draw(0, 0, 127, 125, cx, cy, 200, 200)
+            self.no_damage.clip_draw(0, 0, 127, 125, cx + 10, cy, 200 * ex, 200 * ex)
         
-        if ingame.collide_box:
+        if server.collide_box:
                 draw_rectangle(*self.get_bb())
 
 
@@ -291,24 +285,20 @@ class Knight:
                         if self.move == False:
                             self.dir = -1
                             if self.damage == False: 
-                                self.face_dir = self.dir
-                                if self.y == BOTTOM:
-                                    self.move_sound.repeat_play()
+                                if self.dash == False: self.face_dir = self.dir
                             self.move = True
                         else:
                             self.move = False
-                            self.move_sound.stop()
+                            
                     case pico2d.SDLK_RIGHT:    # right
                         if self.move == False:
                             self.dir = 1
                             if self.damage == False: 
-                                self.face_dir = self.dir
-                                if self.y == BOTTOM:
-                                    self.move_sound.repeat_play()
+                                if self.dash == False: self.face_dir = self.dir
                             self.move = True
                         else:
                             self.move = False
-                            self.move_sound.stop()
+                            
                     case pico2d.SDLK_z:        # jump
                         if self.jump == False and self.dash == False:
                             if self.frame != 0:
@@ -316,6 +306,7 @@ class Knight:
                             self.jump = True
                             if self.damage == False: 
                                 self.jump_sound.play()
+                                
                     case pico2d.SDLK_x:        # attack
                         if self.attack == False and self.dash == False:
                             if self.frame != 0:
@@ -323,6 +314,7 @@ class Knight:
                             self.attack = True
                             if self.damage == False: 
                                 Knight.attack_sound(self)
+                                
                     case pico2d.SDLK_c:        # dash
                         if self.dash == False:
                             if self.dash_count < 1:
@@ -334,7 +326,8 @@ class Knight:
                                 self.dash = True
                                 if self.damage == False: 
                                     self.dash_sound.play()
-                    case pico2d.SDLK_a:
+                                    
+                    case pico2d.SDLK_a:        # heal
                         if self.idle or self.move:
                             if self.heal == False:
                                 self.heal = True
@@ -345,25 +338,25 @@ class Knight:
                     case pico2d.SDLK_LEFT:     # left
                         if self.move == True:
                             self.move = False
-                            self.move_sound.stop()
                         else:
                             self.dir = 1
                             if self.damage == False: 
-                                self.face_dir = self.dir
-                                if self.y == BOTTOM:
-                                    self.move_sound.repeat_play()
+                                if self.dash == False: self.face_dir = self.dir
+                                # if self.y == bottom:
+                                #     self.move_sound.repeat_play()
                             self.move = True
+                            
                     case pico2d.SDLK_RIGHT:    # right
                         if self.move == True:
                             self.move = False
-                            self.move_sound.stop()
                         else:
                             self.dir = -1
                             if self.damage == False: 
-                                self.face_dir = self.dir
-                                if self.y == BOTTOM:
-                                    self.move_sound.repeat_play()
+                                if self.dash == False: self.face_dir = self.dir
+                                # if self.y == bottom:
+                                #     self.move_sound.repeat_play()
                             self.move = True
+                            
                     case pico2d.SDLK_z:
                         if self.jump == True and self.gravity < FALL_G:
                             if self.gravity < 5:
@@ -371,11 +364,65 @@ class Knight:
                             else: self.gravity = FALL_G
                         
     def get_bb(self):
-        if self.dir == 1: return self.x - 23, self.y - 60, self.x + 33, self.y + 58
-        else: return self.x - 15, self.y - 60, self.x + 43, self.y + 58
+        cx, cy = self.x - server.background.window_left, self.y - server.background.window_bottom
+        
+        if self.face_dir == 1: return cx - 20, cy - 60, cx + 33, cy + 40
+        else: return cx - 15, cy - 60, cx + 38, cy + 40
         
     def handle_collision(self, other, group):
+        cx, cy = self.x - server.background.window_left, self.y - server.background.window_bottom
+        
+        if self.face_dir == 1:
+            left, bottom, right, top = cx - 20, cy - 60, cx + 33, cy + 40
+        else:
+            left, bottom, right, top = cx - 15, cy - 60, cx + 38, cy + 40
         match group:
+            case 'knight:wall':
+                
+                if other.top > bottom and other.top - bottom < 50:
+                    if self.fall or self.jump:
+                        self.frame = 0
+                        self.gravity = 0
+                        self.fall = False
+                        self.jump = False
+                        # self.land_sound.play()
+                    self.y = other.y1 + 60
+                    
+                elif other.bottom < top and top - other.bottom < 50:
+                    if self.fall or self.jump:
+                        self.frame = 0
+                        self.gravity = FALL_G
+                        self.fall = False
+                        self.jump = False
+                        # self.fall_sound.play()
+                    self.y = other.y2 - 60
+                    
+                if other.top - bottom > 30 or other.bottom - top > 50:
+                    if other.right > left and other.right - left < 50:
+                        self.x += self.dir * 6
+                        if self.face_dir == 1:
+                            self.x = other.x2 + 20
+                        else: 
+                            self.x = other.x2 + 15
+                    
+                    elif other.left < right and right - other.left < 50:
+                        self.x += self.dir * 6
+                        if self.face_dir == 1: 
+                            self.x = other.x1 - 33
+                        else: 
+                            self.x = other.x1 - 38
+                    
+                    
+                if self.y == other.y1 + 60:
+                    self.collide_bottom = True
+                if self.y == other.y2 - 60:
+                    self.collide_top = True
+                if self.x == other.x2 + 23 or self.x == other.x2 + 15:
+                    self.collide_left = True
+                if self.x == other.x1 - 33 or self.x == other.x2 - 43:
+                    self.collide_right = True
+                    
+                    
             case 'knight:crawlid':
                 if other.dead == False:
                     if self.damage == False and self.no_dmg == False:
@@ -415,35 +462,36 @@ class Knight:
                 case 4: self.attack_sound4.play()
                 case 5: self.attack_sound5.play()
                     
-
-
-
-
+                    
+                    
+                    
                     
 class Spike:
     def __init__(self):
-        self.x, self.y = ingame.knight.x, ingame.knight.y
-        self.hit_sound = load_music('music/enemy/enemy_damage.wav')
+        self.x, self.y = 0, 0
+        self.hit_sound = load_wav('music/enemy/enemy_damage.wav')
 
         
     def update(self):
-        self.x, self.y = ingame.knight.x, ingame.knight.y
+        self.x, self.y = server.knight.x - server.background.window_left, server.knight.y - server.background.window_bottom
     
     def draw(self):
-        if ingame.collide_box:
+        if server.collide_box:
             draw_rectangle(*self.get_bb())
     
-    def get_bb(self):
-        if ingame.knight.face_dir == 1: return ingame.knight.x, ingame.knight.y - 40, ingame.knight.x + 120, ingame.knight.y + 40
-        else: return ingame.knight.x, ingame.knight.y - 40, ingame.knight.x - 120, ingame.knight.y + 40
+    def get_bb(self):        
+        if server.knight.face_dir == 1: 
+            return self.x, self.y - 40, self.x + 140, self.y + 40
+        else: 
+            return self.x - 140, self.y - 40, self.x, self.y + 40
         
     def handle_collision(self, other, group):
-        if ingame.knight.attack and other.dead == False:
+        if server.knight.attack and other.dead == False:
             if group == 'spike:crawlid':
-                ingame.knight.attack_count = True
+                server.knight.attack_count = True
                 
             if group == 'spike:husk':
-                    ingame.knight.attack_count = True
+                    server.knight.attack_count = True
                     
             if group == 'spike:vengefly':
-                    ingame.knight.attack_count = True
+                    server.knight.attack_count = True

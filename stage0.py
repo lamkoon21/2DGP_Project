@@ -49,7 +49,7 @@ def enter():
     game_world.add_object(server.background, 0)
     
     # init 2660
-    set_knight(2660, constant_value.bottom)
+    set_knight(700, 2430)
     
     with open('wall_stage0.json', 'r') as f:
         wall_list = json.load(f)
@@ -63,17 +63,19 @@ def exit():
     
     
 def update():
-    for game_object in game_world.all_objects():
-        game_object.update()
-        
+    server.background.update()
+    server.knight.collide_bottom = False
+    server.knight.collide_top = False
+    server.knight.collide_left = False
+    server.knight.collide_right = False
     for a, b, group in game_world.all_collision_pairs():
         if collide(a, b):
-            print('COLLISION', group)
+            # print('COLLISION', group)
             a.handle_collision(b, group)
             b.handle_collision(a, group)
             
-    # print(constant_value.right)
-    # print(constant_value.top)
+    for game_object in game_world.all_objects():
+        game_object.update()
     
         
 def draw():
