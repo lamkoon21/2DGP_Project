@@ -1,34 +1,22 @@
 from pico2d import *
-import ingame
+import server
+from constant_value import *
 import game_framework
 import game_world
-
-BOTTOM = 400
-TOP = 1050
-LEFT = 30
-RIGHT = 1890
-
-PIXEL_PER_METER = (10.0 / 0.3)
-RUN_SPEED_KMPH = 20.0
-RUN_SPEED_MPM = (RUN_SPEED_KMPH * 1000.0 / 60.0)
-RUN_SPEED_MPS = (RUN_SPEED_MPM / 60.0)
-RUN_SPEED_PPS = (RUN_SPEED_MPS * PIXEL_PER_METER)
-TIME_PER_ACTION = 0.5
-ACTION_PER_TIME = 1.0 / TIME_PER_ACTION
 
 class Crawlid:
     image_l = None
     image_r = None
     def __init__(self):
-        self.x, self. y = None, None
+        self.x, self.y = 0, 0
         self.frame = 0
         self.dir = 1
         if  Crawlid.image_l == None:
             Crawlid.image_l = load_image('image/enemy/Crawlid_L.png')
         if  Crawlid.image_r == None:
             Crawlid.image_r = load_image('image/enemy/Crawlid_R.png')
-        self.move_sound = load_music('music/enemy/crawlid.wav')
-        self.death_sound = load_music('music/enemy/enemy_death.wav')
+        self.move_sound = load_wav('music/enemy/crawlid.wav')
+        self.death_sound = load_wav('music/enemy/enemy_death.wav')
         self.move_sound.set_volume(80)
         self.sound_play = False
         self.font = load_font('font.ttf', 16)
@@ -43,7 +31,7 @@ class Crawlid:
         self.dead = False
         self.dead_back = None
     
-    def update(self):
+    def update(self):        
         if self.dead:
             self.hp = -1
             if int(self.frame) < 1:
@@ -51,24 +39,24 @@ class Crawlid:
                 
             if self.dead_back == None:
                 self.death_sound.play()
-                if self.y > BOTTOM:
+                if self.y > bottom:
                     self.gravity += 0.5
                     self.y -= self.gravity
                     self.dead_back = 3
                 else:
-                    self.y = BOTTOM
+                    self.y = bottom
                     self.gravity = 0
                     self.dead_back = 3
             elif self.dead_back > 0:
                 self.x += (self.dead_back * 2)
                 self.gravity += 0.5
                 self.y += (self.dead_back * 2) - self.gravity
-                if self.y <= BOTTOM:
+                if self.y <= bottom:
                     self.dead_back -= 1
                     self.gravity = 0
                     
         elif self.damage_back > 0:
-            self.x += ingame.knight.face_dir * 10
+            self.x += server.knight.face_dir * 10
             self.damage_back -= 1
                 
         elif self.turn:
@@ -86,7 +74,7 @@ class Crawlid:
                 self.dir *= -1
                 
         elif self.move:
-            if ingame.knight.x > self.x - 1000 and ingame.knight.x < self.x + 1000 and self.sound_play == False:
+            if server.knight.x > self.x - 1000 and server.knight.x < self.x + 1000 and self.sound_play == False:
                 # self.move_sound.repeat_play()
                 self.sound_play = True
             else:
@@ -104,36 +92,39 @@ class Crawlid:
             self.frame = 0
             
     def draw(self):
-        if ingame.collide_box:
+        cx, cy = self.x - server.background.window_left, self.y - server.background.window_bottom
+        
+        if server.collide_box:
             draw_rectangle(*self.get_bb())
-            self.font.draw(self.x, self.y + 60, f'(HP: {self.hp})', (255, 255, 0))
+            self.font.draw(cx, cy + 60, f'(HP: {self.hp})', (255, 255, 0))
         if self.dir == 1:
             if self.dead:
-                self.image_r.clip_draw(345 - int(self.frame) * 130, 0, 140, 90, self.x, self.y - 20)
+                self.image_r.clip_draw(345 - int(self.frame) * 130, 0, 140, 90, cx, cy - 20)
             elif self.turn:
-                self.image_r.clip_draw(380 - int(self.frame) * 97, 259, 94, 80, self.x, self.y - 20)
+                self.image_r.clip_draw(380 - int(self.frame) * 97, 259, 94, 80, cx, cy - 20)
             elif self.move:
-                self.image_r.clip_draw(360 - int(self.frame) * 119, 365, 115, 80, self.x, self.y - 20)
+                self.image_r.clip_draw(360 - int(self.frame) * 119, 365, 115, 80, cx, cy - 20)
             else:
-                self.image_r.clip_draw(360 - int(self.frame) * 119, 365, 115, 80, self.x, self.y - 20)
+                self.image_r.clip_draw(360 - int(self.frame) * 119, 365, 115, 80, cx, cy - 20)
                 
         elif self.dir == -1:
             if self.dead:
-                self.image_l.clip_draw(int(self.frame) * 125, 0, 135, 90, self.x, self.y - 20)
+                self.image_l.clip_draw(int(self.frame) * 125, 0, 135, 90, cx, cy - 20)
             elif self.turn:
-                self.image_l.clip_draw(int(self.frame) * 97 + 3, 259, 94, 80, self.x, self.y - 20)
+                self.image_l.clip_draw(int(self.frame) * 97 + 3, 259, 94, 80, cx, cy - 20)
             elif self.move:
-                self.image_l.clip_draw(int(self.frame) * 119 + 3, 365, 115, 80, self.x, self.y - 20)
+                self.image_l.clip_draw(int(self.frame) * 119 + 3, 365, 115, 80, cx, cy - 20)
             else:
-                self.image_l.clip_draw(int(self.frame) * 119 + 3, 365, 115, 80, self.x, self.y - 20)
+                self.image_l.clip_draw(int(self.frame) * 119 + 3, 365, 115, 80, cx, cy - 20)
                 
     def get_bb(self):
-        return self.x - 50, self.y - 60, self.x + 50, self.y + 20
+        cx, cy = self.x - server.background.window_left, self.y - server.background.window_bottom
+        return cx - 50, cy - 60, cx + 50, cy + 20
     
     def handle_collision(self, other, group):
         if self.dead == False:
             if group == 'spike:crawlid':
-                if ingame.knight.attack:
+                if server.knight.attack:
                     if self.damage == False:
                         self.hp -= 1
                         self.damage_back = 5
@@ -145,18 +136,18 @@ class Husk:
     image_l = None
     image_r = None
     def __init__(self):
-        self.x, self. y = None, None
+        self.x, self.y = 0, 0
         self.frame = 0
         self.dir = -1
         if Husk.image_l == None:
             Husk.image_l = load_image('image/enemy/Husk_L.png')
         if Husk.image_r == None:
             Husk.image_r = load_image('image/enemy/Husk_R.png')
-        self.move_sound = load_music('music/enemy/husk_step.wav')
-        self.attack_sound = load_music('music/enemy/husk_chase.wav')
-        self.find_sound = load_music('music/enemy/husk_find.wav')
-        self.death_sound1 = load_music('music/enemy/enemy_death.wav')
-        self.death_sound2 = load_music('music/enemy/husk_death.wav')
+        self.move_sound = load_wav('music/enemy/husk_step.wav')
+        self.attack_sound = load_wav('music/enemy/husk_chase.wav')
+        self.find_sound = load_wav('music/enemy/husk_find.wav')
+        self.death_sound1 = load_wav('music/enemy/enemy_death.wav')
+        self.death_sound2 = load_wav('music/enemy/husk_death.wav')
         self.move_sound.set_volume(80)
         self.move_play = False
         self.find_play = False
@@ -178,17 +169,20 @@ class Husk:
     
     def update(self):
         
+        self.cx = self.x - server.background.window_left
+        self.cy = self.y - server.background.window_bottom
+        
          # attack range
         if self.find == False and self.attack == False:
-            if ingame.knight.y - 50 < self.y + 50:
-                if ingame.knight.x > self.x - 400 and ingame.knight.x < self.x + 400:
+            if server.knight.y - 50 < self.y + 50:
+                if server.knight.x > self.x - 400 and server.knight.x < self.x + 400:
                     if self.dir == 1:
-                        if ingame.knight.x < self.x:
+                        if server.knight.x < self.x:
                             self.dir = -1
                         self.find = True
                         self.frame = 0
                     elif self.dir == -1:
-                        if ingame.knight.x > self.x:
+                        if server.knight.x > self.x:
                             self.dir = 1
                         self.find = True
                         self.frame = 0
@@ -199,12 +193,12 @@ class Husk:
                 self.frame = (self.frame + 8 * ACTION_PER_TIME * game_framework.frame_time) % 8
             
             if self.dead_back == None:
-                if self.y > BOTTOM:
+                if self.y > bottom:
                     self.gravity += 0.5
                     self.y -= self.gravity
                     self.dead_back = 3
                 else:
-                    self.y = BOTTOM
+                    self.y = bottom
                     self.gravity = 0
                     self.dead_back = 3
                 self.death_sound1.play()
@@ -213,12 +207,12 @@ class Husk:
                 self.x += (self.dead_back * 2)
                 self.gravity += 0.5
                 self.y += (self.dead_back * 2) - self.gravity
-                if self.y <= BOTTOM:
+                if self.y <= bottom:
                     self.dead_back -= 1
                     self.gravity = 0
                 
         elif self.move:
-            if ingame.knight.x > self.x - 1000 and ingame.knight.x < self.x + 1000 and self.move_play == False:
+            if server.knight.x > self.x - 1000 and server.knight.x < self.x + 1000 and self.move_play == False:
                 # self.move_sound.repeat_play()
                 self.move_play = True
             else:
@@ -231,7 +225,7 @@ class Husk:
             pass
         
         elif self.damage_back > 0:
-            self.x += ingame.knight.face_dir * 10
+            self.x += server.knight.face_dir * 10
             self.damage_back -= 1
         
         elif self.find:
@@ -277,7 +271,7 @@ class Husk:
             self.x += self.dir * 5.5
             
             if self.dir == 1:
-                if ingame.knight.y - 50 > self.y + 50 or ingame.knight.x < self.x or ingame.knight.x > self.x + 350:
+                if server.knight.y - 50 > self.y + 50 or server.knight.x < self.x or server.knight.x > self.x + 350:
                     if self.attack_range > 0:
                         self.attack_range -= abs(self.dir * 2)
                     else:
@@ -286,7 +280,7 @@ class Husk:
                         self.attack = False
                         self.attack_range = 150
             else:
-                if ingame.knight.y - 50 > self.y + 50 or ingame.knight.x < self.x - 350 or ingame.knight.x > self.x:
+                if server.knight.y - 50 > self.y + 50 or server.knight.x < self.x - 350 or server.knight.x > self.x:
                     if self.attack_range > 0:
                         self.attack_range -= abs(self.dir * 2)
                     else:
@@ -304,45 +298,48 @@ class Husk:
             self.frame = 0
             
     def draw(self):
-        if ingame.collide_box:
+        cx, cy = self.x - server.background.window_left, self.y - server.background.window_bottom
+
+        if server.collide_box:
             draw_rectangle(*self.get_bb())
-            self.font.draw(self.x, self.y + 80, f'(HP: {self.hp})', (255, 255, 0))
+            self.font.draw(cx, cy + 80, f'(HP: {self.hp})', (255, 255, 0))
             
         if self.dir == 1:
             if self.dead:
-                self.image_r.clip_draw(975 - int(self.frame) * 140, 0, 140, 120, self.x, self.y - 5)
+                self.image_r.clip_draw(975 - int(self.frame) * 140, 0, 140, 120, cx, cy - 5)
             elif self.turn:
-                self.image_r.clip_draw(1009 - int(self.frame) * 105, 715, 105, 128, self.x, self.y)
+                self.image_r.clip_draw(1009 - int(self.frame) * 105, 715, 105, 128, cx, cy)
             elif self.find:
-                self.image_r.clip_draw(1002 - int(self.frame) * 118, 555, 110, 135, self.x, self.y)
+                self.image_r.clip_draw(1002 - int(self.frame) * 118, 555, 110, 135, cx, cy)
             elif self.attack:
-                self.image_r.clip_draw(990 - int(self.frame) * 125, 410, 125, 125, self.x, self.y)
+                self.image_r.clip_draw(990 - int(self.frame) * 125, 410, 125, 125, cx, cy)
             elif self.move:
-                self.image_r.clip_draw(997 - int(self.frame) * 118, 865, 115, 127, self.x, self.y)
+                self.image_r.clip_draw(997 - int(self.frame) * 118, 865, 115, 127, cx, cy)
             else:
-                self.image_r.clip_draw(997 - int(self.frame) * 118, 865, 115, 127, self.x, self.y)
+                self.image_r.clip_draw(997 - int(self.frame) * 118, 865, 115, 127, cx, cy)
                 
         elif self.dir == -1:
             if self.dead:
-                self.image_l.clip_draw(int(self.frame) * 140, 0, 140, 120, self.x, self.y - 5)
+                self.image_l.clip_draw(int(self.frame) * 140, 0, 140, 120, cx, cy - 5)
             elif self.turn:
-                self.image_l.clip_draw(int(self.frame) * 105 + 5, 715, 105, 128, self.x, self.y)
+                self.image_l.clip_draw(int(self.frame) * 105 + 5, 715, 105, 128, cx, cy)
             elif self.find:
-                self.image_l.clip_draw(int(self.frame) * 118 + 3, 555, 110, 135, self.x, self.y)
+                self.image_l.clip_draw(int(self.frame) * 118 + 3, 555, 110, 135, cx, cy)
             elif self.attack:
-                self.image_l.clip_draw(int(self.frame) * 124 + 3, 410, 125, 125, self.x, self.y)
+                self.image_l.clip_draw(int(self.frame) * 124 + 3, 410, 125, 125, cx, cy)
             elif self.move:
-                self.image_l.clip_draw(int(self.frame) * 118 + 3, 865, 115, 130, self.x, self.y)
+                self.image_l.clip_draw(int(self.frame) * 118 + 3, 865, 115, 130, cx, cy)
             else:
-                self.image_l.clip_draw(int(self.frame) * 118 + 3, 865, 115, 130, self.x, self.y)
+                self.image_l.clip_draw(int(self.frame) * 118 + 3, 865, 115, 130, cx, cy)
                 
     def get_bb(self):
-        return self.x - 50, self.y - 60, self.x + 50, self.y + 60
+        cx, cy = self.x - server.background.window_left, self.y - server.background.window_bottom
+        return cx - 50, cy - 60, cx + 50, cy + 60
     
     def handle_collision(self, other, group):
         if self.dead == False:
             if group == 'spike:husk':
-                if ingame.knight.attack:
+                if server.knight.attack:
                     if self.damage == False:
                         self.hp -= 1
                         self.damage_back = 5
@@ -354,7 +351,7 @@ class Vengefly:
     image_l = None
     image_r = None
     def __init__(self):
-        self.x, self. y = None, None
+        self.x, self.y = 0, 0
         self.frame = 0
         self.dir = -1
         self.dir_y = 0.0
@@ -362,9 +359,9 @@ class Vengefly:
             Vengefly.image_l = load_image('image/enemy/Vengefly_L.png')
         if Vengefly.image_r == None:
             Vengefly.image_r = load_image('image/enemy/Vengefly_R.png')
-        self.move_sound = load_music('music/enemy/vengefly_fly.wav')
-        self.find_sound = load_music('music/enemy/vengefly_find.wav')
-        self.death_sound = load_music('music/enemy/enemy_death.wav')
+        self.move_sound = load_wav('music/enemy/vengefly_fly.wav')
+        self.find_sound = load_wav('music/enemy/vengefly_find.wav')
+        self.death_sound = load_wav('music/enemy/enemy_death.wav')
         self.move_sound.set_volume(80)
         self.font = load_font('font.ttf', 16)
         self.move_play = False
@@ -382,18 +379,22 @@ class Vengefly:
         self.dead_back = None
     
     def update(self):
+        
+        self.cx = self.x - server.background.window_left
+        self.cy = self.y - server.background.window_bottom
+        
         if self.dead:
             self.hp = -1
             if int(self.frame) < 2:
                 self.frame = (self.frame + 3 * ACTION_PER_TIME * game_framework.frame_time) % 3
             
             if self.dead_back == None:
-                if self.y > BOTTOM:
+                if self.y > bottom:
                     self.gravity += 0.5
                     self.y -= self.gravity
                     self.dead_back = 3
                 else:
-                    self.y = BOTTOM
+                    self.y = bottom
                     self.gravity = 0
                     self.dead_back = 3
                 self.death_sound.play()
@@ -401,7 +402,7 @@ class Vengefly:
                 self.x += (self.dead_back * 2)
                 self.gravity += 1
                 self.y += (self.dead_back * 2) - self.gravity
-                if self.y <= BOTTOM:
+                if self.y <= bottom:
                     self.dead_back -= 1
                     self.gravity = 0
                 
@@ -435,7 +436,7 @@ class Vengefly:
             pass
         
         elif self.damage_back > 0:
-            self.x += ingame.knight.face_dir * 10
+            self.x += server.knight.face_dir * 10
             self.damage_back -= 1
         
         elif self.find:
@@ -458,26 +459,26 @@ class Vengefly:
             self.frame = (self.frame + 4 * ACTION_PER_TIME * game_framework.frame_time) % 4
                 
             if self.dir == 1:
-                if ingame.knight.x < self.x:
+                if server.knight.x < self.x:
                     self.dir = -1
             elif self.dir == -1:
-                if ingame.knight.x > self.x:
+                if server.knight.x > self.x:
                     self.dir = 1
                     
-            if ingame.knight.y < self.y:
+            if server.knight.y < self.y:
                 self.dir_y = -1
-            elif ingame.knight.y > self.y:
+            elif server.knight.y > self.y:
                 self.dir_y = 1
                 
             
             self.x += self.dir * 5
-            if self.x + (300 * self.dir) < ingame.knight.x and self.y - 40 > BOTTOM:
+            if self.x + (300 * self.dir) < server.knight.x and self.y - 40 > bottom:
                 self.y += self.dir_y * 3.5
             
         # attack range
         if self.find == False and self.attack == False:
-            if ingame.knight.y + 30 > self.y - 400 and ingame.knight.y + 30 < self.y + 400:
-                if ingame.knight.x > self.x - 400 and ingame.knight.x < self.x + 400:
+            if server.knight.y + 30 > self.y - 400 and server.knight.y + 30 < self.y + 400:
+                if server.knight.x > self.x - 400 and server.knight.x < self.x + 400:
                     self.find = True
                     self.frame = 0
             
@@ -490,54 +491,57 @@ class Vengefly:
             self.frame = 0
             
     def draw(self):
-        if ingame.collide_box:
+        cx, cy = self.x - server.background.window_left, self.y - server.background.window_bottom
+        
+        if server.collide_box:
             draw_rectangle(*self.get_bb())
-            self.font.draw(self.x, self.y + 80, f'(HP: {self.hp})', (255, 255, 0))
+            self.font.draw(cx, cy + 80, f'(HP: {self.hp})', (255, 255, 0))
             
         if self.dir == 1:
             if self.dead:
-                self.image_r.clip_draw(455 - int(self.frame) * 150, 0, 150, 110, self.x, self.y - 25)
+                self.image_r.clip_draw(455 - int(self.frame) * 150, 0, 150, 110, cx, cy - 25)
             elif self.turn:
-                self.image_r.clip_draw(485 - int(self.frame) * 110, 465, 110, 140, self.x, self.y)
+                self.image_r.clip_draw(485 - int(self.frame) * 110, 465, 110, 140, cx, cy)
             elif self.find:
-                self.image_r.clip_draw(470 - int(self.frame) * 160, 285, 160, 160, self.x, self.y)
+                self.image_r.clip_draw(470 - int(self.frame) * 160, 285, 160, 160, cx, cy)
             elif self.attack:
-                self.image_r.clip_draw(460 - int(self.frame) * 150, 130, 150, 140, self.x, self.y)
+                self.image_r.clip_draw(460 - int(self.frame) * 150, 130, 150, 140, cx, cy)
             elif self.move:
-                self.image_r.clip_draw(485 - int(self.frame) * 120, 635, 115, 140, self.x, self.y)
+                self.image_r.clip_draw(485 - int(self.frame) * 120, 635, 115, 140, cx, cy)
             else:
-                self.image_r.clip_draw(485 - int(self.frame) * 120, 635, 115, 140, self.x, self.y)
+                self.image_r.clip_draw(485 - int(self.frame) * 120, 635, 115, 140, cx, cy)
                 
         elif self.dir == -1:
             if self.dead:
-                self.image_l.clip_draw(int(self.frame) * 150, 0, 150, 110, self.x, self.y - 25)
+                self.image_l.clip_draw(int(self.frame) * 150, 0, 150, 110, cx, cy - 25)
             elif self.turn:
-                self.image_l.clip_draw(int(self.frame) * 110, 465, 115, 140, self.x, self.y)
+                self.image_l.clip_draw(int(self.frame) * 110, 465, 115, 140, cx, cy)
             elif self.find:
-                self.image_l.clip_draw(int(self.frame) * 150, 285, 150, 160, self.x, self.y)
+                self.image_l.clip_draw(int(self.frame) * 150, 285, 150, 160, cx, cy)
             elif self.attack:
-                self.image_l.clip_draw(int(self.frame) * 145, 130, 150, 140, self.x, self.y)
+                self.image_l.clip_draw(int(self.frame) * 145, 130, 150, 140, cx, cy)
             elif self.move:
-                self.image_l.clip_draw(int(self.frame) * 120 + 5, 635, 115, 140, self.x, self.y)
+                self.image_l.clip_draw(int(self.frame) * 120 + 5, 635, 115, 140, cx, cy)
             else:
-                self.image_l.clip_draw(int(self.frame) * 120 + 5, 635, 115, 140, self.x, self.y)
+                self.image_l.clip_draw(int(self.frame) * 120 + 5, 635, 115, 140, cx, cy)
                 
     def get_bb(self):
-        return self.x - 50, self.y - 60, self.x + 50, self.y + 50
+        cx, cy = self.x - server.background.window_left, self.y - server.background.window_bottom
+        return cx - 50, cy - 60, cx + 50, cy + 50
     
     dmg = False
     
     def handle_collision(self, other, group):
         if self.dead == False:
             if group == 'spike:vengefly':
-                if ingame.knight.attack:
+                if server.knight.attack:
                     if self.damage == False:
                         self.hp -= 1
                         self.damage_back = 5
                         self.damage = True
                 else:
                     self.damage = False
-                
+                    
 def range_check(self):
     
     if self.attack == False:
@@ -546,17 +550,17 @@ def range_check(self):
             self.turn = True
             self.move = False
     else:
-        self.range_x1 = LEFT
-        self.range_x2 = RIGHT
+        self.range_x1 = left
+        self.range_x2 = right
     
-    if self.x > RIGHT:
-        self.x = RIGHT
+    if self.x > right:
+        self.x = right
         self.turn = True
-    elif self.x < LEFT:
-        self.x = LEFT
+    elif self.x < left:
+        self.x = left
         self.turn = True
         
-    if self.y > TOP:
-        self.y = TOP
-    elif self.y < BOTTOM:
-        self.y = BOTTOM
+    if self.y > top:
+        self.y = top
+    elif self.y < bottom:
+        self.y = bottom

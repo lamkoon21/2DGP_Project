@@ -1,6 +1,6 @@
 from pico2d import *
 import game_framework
-import ingame
+import server
 import game_world
 
 class Map:
@@ -21,27 +21,25 @@ def exit():
     global map
     del map
     
+    
 def update():
-    ingame.knight, ingame.soul, ingame.husks, ingame.crawlids, ingame.vengeflies
+    server.soul.hp = server.knight.hp
+    server.soul.soul = server.knight.soul
+    server.knight.update()
+    server.soul.update()
     
-    
-    ingame.soul.hp = ingame.knight.hp
-    ingame.soul.soul = ingame.knight.soul
-    ingame.knight.update()
-    ingame.soul.update()
-    
-    # for crawlid in ingame.crawlids:
+    # for crawlid in server.crawlids:
     #     crawlid.update()
     
-    # for husk in ingame.husks:
+    # for husk in server.husks:
     #     husk.update()
-    #     husk.find_x = ingame.knight.x
-    #     husk.find_y = ingame.knight.y
+    #     husk.find_x = server.knight.x
+    #     husk.find_y = server.knight.y
     
-    # for vengefly in ingame.vengeflies:
+    # for vengefly in server.vengeflies:
     #     vengefly.update()
-    #     vengefly.find_x = ingame.knight.x
-    #     vengefly.find_y = ingame.knight.y
+    #     vengefly.find_x = server.knight.x
+    #     vengefly.find_y = server.knight.y
 
 def draw():
     clear_canvas()
@@ -52,12 +50,12 @@ def handle_events():
     events = get_events()
     for event in events:
         if (event.type, event.key) == (SDL_KEYUP, pico2d.SDLK_TAB):
-            ingame.knight.frame = 0
-            ingame.knight.map_open = False
-            ingame.knight.map_close = True
+            server.knight.frame = 0
+            server.knight.map_open = False
+            server.knight.map_close = True
             game_framework.pop_state()
         else:
-            ingame.knight.handle_events(event)
+            server.knight.handle_events(event)
 
 def pause():
     global map
