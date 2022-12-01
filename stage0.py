@@ -27,10 +27,6 @@ def handle_events():
                 server.knight.attack_2 = False
                 server.knight.damage = False
                 server.knight.map_open = True
-                constant_value.left = 0
-                constant_value.bottom = 0
-                constant_value.right = 0
-                constant_value.top = 0
                 game_framework.push_state(ui_map)
         elif (event.type, event.key) == (SDL_KEYDOWN, SDLK_EQUALS):
             if server.collide_box: server.collide_box = False
@@ -41,8 +37,9 @@ def handle_events():
 def enter():
     server.background = Background()
     server.background.select_map = 0
-    server.background.w = server.background.map1.w
-    server.background.h = server.background.map1.h
+    server.background.image = load_image('image/map/map0.png')
+    server.background.w = server.background.image.w
+    server.background.h = server.background.image.h
         
     server.bgm = load_music('music/bgm/map0.wav')
     server.bgm.repeat_play()
@@ -51,9 +48,10 @@ def enter():
     # init 2660
     set_knight(700, 2430)
     
-    with open('wall_stage0.json', 'r') as f:
+    with open('wall_data.json', 'r') as f:
         wall_list = json.load(f)
-        for o in wall_list:
+        wall_data = wall_list['stage0']
+        for o in wall_data:
             wall = Wall(o['x1'], o['y1'], o['x2'], o['y2'])
             game_world.add_object(wall, 0)
             game_world.add_collision_pairs(server.knight, wall, 'knight:wall')
@@ -110,7 +108,7 @@ def collide(a, b):
 # set objects
     
 def set_knight(x, y):
-    server.knight = player.Knight()
+    server.knight = player.Knight(x, y, 5, 0, 0)
     server.knight.x = x
     server.knight.y = y
     server.spike = player.Spike()

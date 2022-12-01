@@ -1,0 +1,99 @@
+{
+    "stage1":
+    {
+        "crawlid":
+        [
+            {"x": 1500, "y":1550, "dir": 1, "range_x1": 1070, "range_x2": 2100}
+        ],
+        
+        "husk":
+        [
+            {"x": 5100, "y":1350, "dir": -1, "range_x1": 4700, "range_x2": 5400}
+        ],
+
+        "vengefly":
+        [
+            {"x": 700, "y":1700, "dir": -1, "range_x1": 400, "range_x2": 1300}
+        ]
+    },
+
+    "stage3":
+    {
+        "crawlid":
+        [
+
+        ],
+        "husk":
+        [
+
+        ],
+        "vengefly":
+        [
+
+        ]
+    },
+
+    "stage4":
+    {
+        "crawlid":
+        [
+
+        ],
+        "husk":
+        [
+
+        ],
+        "vengefly":
+        [
+
+        ]
+    },
+
+    "stage5":
+    {
+        "crawlid":
+        [
+
+        ],
+        "husk":
+        [
+
+        ],
+        "vengefly":
+        [
+
+        ]
+    },
+
+    "stage6":
+    {
+        "crawlid":
+        [
+
+        ],
+        "husk":
+        [
+
+        ],
+        "vengefly":
+        [
+
+        ]
+    },
+
+    "stage7":
+    {
+        "crawlid":
+        [
+
+        ],
+        "husk":
+        [
+
+        ],
+        "vengefly":
+        [
+
+        ]
+    }
+}

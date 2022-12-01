@@ -5,11 +5,7 @@ from constant_value import ex
 class FixedBackground:
     
     def __init__(self):
-        self.map0 = load_image('image/map/map0.png')
-        self.map1 = load_image('image/map/map1.png')
-        self.map2 = None
-        self.map3 = None
-        self.map4 = None
+        self.image = None
         self.canvas_width = get_canvas_width()
         self.canvas_height = get_canvas_height()
         self.select_map = 0
@@ -18,55 +14,44 @@ class FixedBackground:
 
 
     def draw(self):
-        match self.select_map:
-            case 0:
-                self.map0.clip_draw_to_origin(
-                self.window_left, self.window_bottom, 
-                self.canvas_width, self.canvas_height, 0, 0)
-            case 1:
-                self.map1.clip_draw_to_origin(
-                self.window_left, self.window_bottom, 
-                self.canvas_width, self.canvas_height, 0, 0, 1920, 1080)
-            case 2:
-                self.map2.clip_draw_to_origin(
-                self.window_left, self.window_bottom, 
-                self.canvas_width, self.canvas_height, 0, 0)
-            case 3:
-                self.map3.clip_draw_to_origin(
-                self.window_left, self.window_bottom, 
-                self.canvas_width, self.canvas_height, 0, 0)
-            case 4:
-                self.map4.clip_draw_to_origin(
-                self.window_left, self.window_bottom, 
-                self.canvas_width, self.canvas_height, 0, 0)
+        self.image.clip_draw_to_origin(
+        self.window_left, self.window_bottom, 
+        self.canvas_width, self.canvas_height, 0, 0)
+        pass
 
     def update(self):
+        self.w = self.image.w
+        self.h = self.image.h
         match self.select_map:
             case 0:
-                self.w = self.map0.w
-                self.h = self.map0.h
                 self.window_left = clamp(0, int(server.knight.x) - self.canvas_width//2, self.w - self.canvas_width - 1)
                 self.window_bottom = clamp(0, int(server.knight.y) - self.canvas_height//4, self.h - self.canvas_height - 1)
-            case 1:
-                self.w = self.map1.w
-                self.h = self.map1.h
+            case 2:
+                self.window_left = clamp(0, int(server.knight.x) - self.canvas_width//2, self.w - self.canvas_width - 1)
+                self.window_bottom = clamp(0, int(server.knight.y) - self.canvas_height//4, self.h - self.canvas_height - 1)
+            case 3:
+                self.window_left = clamp(0, int(server.knight.x) - self.canvas_width//2, self.w - self.canvas_width - 1)
+                self.window_bottom = clamp(0, int(server.knight.y) - self.canvas_height//3, self.h - self.canvas_height - 500)
+            case 4:
+                self.window_left = clamp(0, int(server.knight.x) - self.canvas_width//2, self.w - self.canvas_width - 1)
+                self.window_bottom = clamp(0, 700, self.h - self.canvas_height - 500)
+            case 5:
+                self.window_left = clamp(0, int(server.knight.x) - self.canvas_width//2, self.w - self.canvas_width - 1)
+                if int(server.knight.x) < 4200:
+                    self.window_bottom = clamp(0, int(server.knight.y) - self.canvas_height//2 + 200, self.h - self.canvas_height - 900)
+                else: self.window_bottom = clamp(0, int(server.knight.y) - self.canvas_height//2 + 200, self.h - self.canvas_height - 500)
+            case _:
                 self.window_left = clamp(0, int(server.knight.x) - self.canvas_width//2, self.w - self.canvas_width - 1)
                 self.window_bottom = clamp(0, int(server.knight.y) - self.canvas_height//2, self.h - self.canvas_height - 1)
-            case 2:
-                self.w = self.map2.w
-                self.h = self.map2.h
-            case 3:
-                self.w = self.map3.w
-                self.h = self.map3.h
-            case 4:
-                self.w = self.map4.w
-                self.h = self.map4.h
         
-        
-
     def handle_event(self, event):
         pass
-    
+
+
+
+
+
+
 class TileBackground:
     
     def __init__(self):
