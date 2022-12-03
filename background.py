@@ -1,6 +1,6 @@
 from pico2d import *
 import server
-from constant_value import ex
+import stage0
 
 class FixedBackground:
     
@@ -8,9 +8,9 @@ class FixedBackground:
         self.image = None
         self.canvas_width = get_canvas_width()
         self.canvas_height = get_canvas_height()
-        self.select_map = 0
         self.w = 0
         self.h = 0
+        self.boss_stage = False
 
 
     def draw(self):
@@ -22,7 +22,7 @@ class FixedBackground:
     def update(self):
         self.w = self.image.w
         self.h = self.image.h
-        match self.select_map:
+        match server.current_stage:
             case 0:
                 self.window_left = clamp(0, int(server.knight.x) - self.canvas_width//2, self.w - self.canvas_width - 1)
                 self.window_bottom = clamp(0, int(server.knight.y) - self.canvas_height//4, self.h - self.canvas_height - 1)
@@ -36,10 +36,30 @@ class FixedBackground:
                 self.window_left = clamp(0, int(server.knight.x) - self.canvas_width//2, self.w - self.canvas_width - 1)
                 self.window_bottom = clamp(0, 700, self.h - self.canvas_height - 500)
             case 5:
-                self.window_left = clamp(0, int(server.knight.x) - self.canvas_width//2, self.w - self.canvas_width - 1)
+                self.window_left = clamp(0, int(server.knight.x) - self.canvas_width//2, self.w - self.canvas_width - 400)
                 if int(server.knight.x) < 4200:
                     self.window_bottom = clamp(0, int(server.knight.y) - self.canvas_height//2 + 200, self.h - self.canvas_height - 900)
                 else: self.window_bottom = clamp(0, int(server.knight.y) - self.canvas_height//2 + 200, self.h - self.canvas_height - 500)
+            case 6:
+                
+                if int(server.knight.x) < 2560 and int(server.knight.y) < 1250:
+                    self.window_left = clamp(240, int(server.knight.x) - self.canvas_width//2, 1000)
+                    self.window_bottom = clamp(0, 100, self.h - self.canvas_height - 1)
+                else:
+                    self.window_left = clamp(0, int(server.knight.x) - self.canvas_width//2, self.w - self.canvas_width - 1)
+                    self.window_bottom = clamp(0, int(server.knight.y) - self.canvas_height//2 + 100, self.h - self.canvas_height - 1)
+            case 'boss':
+                if int(server.knight.x) < 2000:
+                    if int(server.knight.x) < 1350:
+                        self.boss_stage = True
+                    if self.boss_stage:
+                        self.window_left = clamp(0, 400, self.w - self.canvas_width - 1)
+                    else:
+                        self.window_left = clamp(0, int(server.knight.x) - self.canvas_width//2, self.w - self.canvas_width - 1)
+                    self.window_bottom = clamp(0, 530, self.h - self.canvas_height - 500)
+                else:
+                    self.window_left = clamp(0, int(server.knight.x) - self.canvas_width//2, self.w - self.canvas_width - 1)
+                    self.window_bottom = clamp(0, int(server.knight.y) - self.canvas_height//2 + 205, self.h - self.canvas_height - 595)
             case _:
                 self.window_left = clamp(0, int(server.knight.x) - self.canvas_width//2, self.w - self.canvas_width - 1)
                 self.window_bottom = clamp(0, int(server.knight.y) - self.canvas_height//2, self.h - self.canvas_height - 1)
@@ -47,8 +67,27 @@ class FixedBackground:
     def handle_event(self, event):
         pass
 
+from constant_value import *
+import game_framework
 
+class Fade_out:
+    
+    def __init__(self):
+        self.image = load_image('image/knight/fade_out.png')
+        self.frame = 0
 
+    def draw(self):
+        if server.knight.dead:
+            self.image.clip_draw(int(self.frame) * 100, 0, 100, 100, 960, 540, 1920, 1080)
+
+    def update(self):
+        if server.knight.dead:
+            if int(self.frame) < 9:
+                self.frame = (self.frame + 10 * ACTION_PER_TIME * game_framework.frame_time) % 10
+            
+        
+    def handle_event(self, event):
+        pass
 
 
 
