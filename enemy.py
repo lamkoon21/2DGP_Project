@@ -7,7 +7,6 @@ import game_world
 class Crawlid:
     image_l = None
     image_r = None
-    move_sound = None
     death_sound = None
     font = None
     def __init__(self, x, y, dir, range_x1, range_x2):
@@ -18,9 +17,6 @@ class Crawlid:
             Crawlid.image_l = load_image('image/enemy/Crawlid_L.png')
         if  Crawlid.image_r == None:
             Crawlid.image_r = load_image('image/enemy/Crawlid_R.png')
-        if Crawlid.move_sound == None:
-            Crawlid.move_sound = load_wav('music/enemy/crawlid.wav')
-            Crawlid.move_sound.set_volume(80)
         if Crawlid.death_sound == None:
             Crawlid.death_sound = load_wav('music/enemy/enemy_death.wav')
         if Crawlid.font == None:
@@ -36,8 +32,6 @@ class Crawlid:
         self.gravity = 0
         self.dead = False
         self.dead_back = None
-        
-        self.move_play = False
         
         self.collide_bottom = False
         self.collide_top = False
@@ -78,11 +72,6 @@ class Crawlid:
                 self.dir *= -1
                 
         elif self.move:
-            if server.knight.x > self.x - 1000 and server.knight.x < self.x + 1000:
-                if self.move_play == False:
-                    # self.move_sound.play()
-                    self.move_play = True
-                pass
             self.frame = (self.frame + 4 * ACTION_PER_TIME * game_framework.frame_time) % 4
             self.x += self.dir * 4
             
@@ -154,9 +143,6 @@ class Husk:
             Husk.image_l = load_image('image/enemy/Husk_L.png')
         if Husk.image_r == None:
             Husk.image_r = load_image('image/enemy/Husk_R.png')
-        if Husk.move_sound == None:
-            Husk.move_sound = load_wav('music/enemy/husk_step.wav')
-            Husk.move_sound.set_volume(80)
         if Husk.death_sound1 == None:
             Husk.death_sound1 = load_wav('music/enemy/enemy_death.wav')
         if Husk.death_sound2 == None:
@@ -177,8 +163,6 @@ class Husk:
         self.gravity = 0
         self.dead = False
         self.dead_back = None
-        self.move_play = False
-        self.find_play = False
         
         self.collide_bottom = False
         self.collide_top = False
@@ -203,11 +187,6 @@ class Husk:
                 self.hp = -1
                 
         elif self.move:
-            if server.knight.x > self.x - 1000 and server.knight.x < self.x + 1000:
-                if self.move_play == False:
-                    # self.move_sound.play()
-                    self.move_play = True
-                pass
             self.frame = (self.frame + 7 * ACTION_PER_TIME * game_framework.frame_time) % 7
             self.x += self.dir * 2
         
