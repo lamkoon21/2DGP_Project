@@ -6,10 +6,27 @@ import game_world
 class Map:
     def __init__(self):
         self.x, self.y = 960, 540
-        self.image = load_image('image/ui/Fragment_04.png')
-        
+        self.empty = load_image('image/ui/empty_map.png')
+        self.map0 = load_image('image/ui/map0.png')
+        self.map1 = load_image('image/ui/map1.png')
+        self.map2 = load_image('image/ui/map2.png')
+        self.map3 = load_image('image/ui/map3.png')
+        self.map4 = load_image('image/ui/map4.png')
+        self.map5 = load_image('image/ui/map5.png')
+        self.map6 = load_image('image/ui/map6.png')
+        self.map7 = load_image('image/ui/map7.png')
+    
     def draw(self):
-        self.image.draw(960, 540)
+        self.empty.draw(960,540)
+        if server.visit[0] == 1: self.map0.clip_draw(0, 0, 450, 172, 740, 699)
+        if server.visit[1] == 1: self.map1.clip_draw(0, 0, 176, 80, 828, 573)
+        if server.visit[2] == 1: self.map2.clip_draw(0, 0, 149, 47, 666, 556)
+        if server.visit[3] == 1: self.map3.clip_draw(0, 0, 141, 37, 987, 566)
+        if server.visit[4] == 1: self.map4.clip_draw(0, 0, 179, 42, 1147, 568)
+        if server.visit[5] == 1: self.map5.clip_draw(0, 0, 150, 53, 1311, 568)
+        if server.visit[6] == 1: self.map6.clip_draw(0, 0, 117, 160, 1320, 462)
+        if server.visit[7] == 1: self.map7.clip_draw(0, 0, 89, 83, 1364, 340)
+            
 
 map = None
 
@@ -20,6 +37,7 @@ def enter():
 def exit():
     global map
     del map
+    server.bgm.set_volume(128)
     
     
 def update():
@@ -50,7 +68,6 @@ def handle_events():
     events = get_events()
     for event in events:
         if (event.type, event.key) == (SDL_KEYUP, pico2d.SDLK_TAB):
-            server.knight.frame = 0
             server.knight.map_open = False
             server.knight.map_close = True
             game_framework.pop_state()
@@ -64,6 +81,7 @@ def pause():
 def resume():
     global map
     del map
+    server.bgm.set_volume(128)
     
 def draw_world():
     global map
