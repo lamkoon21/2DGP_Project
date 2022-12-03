@@ -29,13 +29,15 @@ class Crawlid:
         self.range_x1, self.range_x2 = range_x1, range_x2
         self.turn = False
         self.fall = False
-        self.attack = False
+        self.range = True
         self.damage = False
         self.damage_back = 0
         self.hp = 2
         self.gravity = 0
         self.dead = False
         self.dead_back = None
+        
+        self.move_play = False
         
         self.collide_bottom = False
         self.collide_top = False
@@ -77,10 +79,12 @@ class Crawlid:
                 
         elif self.move:
             if server.knight.x > self.x - 1000 and server.knight.x < self.x + 1000:
-                # self.move_sound.repeat_play()
+                if self.move_play == False:
+                    # self.move_sound.play()
+                    self.move_play = True
                 pass
             self.frame = (self.frame + 4 * ACTION_PER_TIME * game_framework.frame_time) % 4
-            self.x += self.dir * 5
+            self.x += self.dir * 4
             
         if self.fall:
             self.gravity += G
@@ -92,7 +96,6 @@ class Crawlid:
             
     def draw(self):
         cx, cy = self.x - server.background.window_left, self.y - server.background.window_bottom
-        print("crawlid :",self.x, self.y)
         
         if server.collide_box:
             draw_rectangle(*self.get_bb())
@@ -139,7 +142,6 @@ class Husk:
     image_l = None
     image_r = None
     move_sound = None
-    attack_sound = None
     find_sound = None
     death_sound1 = None
     death_sound2 = None
@@ -155,10 +157,6 @@ class Husk:
         if Husk.move_sound == None:
             Husk.move_sound = load_wav('music/enemy/husk_step.wav')
             Husk.move_sound.set_volume(80)
-        if Husk.attack_sound == None:
-            Husk.attack_sound = load_wav('music/enemy/husk_chase.wav')
-        if Husk.find_sound == None:
-            Husk.find_sound = load_wav('music/enemy/husk_find.wav')
         if Husk.death_sound1 == None:
             Husk.death_sound1 = load_wav('music/enemy/enemy_death.wav')
         if Husk.death_sound2 == None:
@@ -167,6 +165,7 @@ class Husk:
             Husk.font = load_font('font.ttf', 16)
         self.move = True
         self.range_x1, self.range_x2 = range_x1, range_x2
+        self.range = True
         self.turn = False
         self.fall = False
         self.find = False
@@ -178,6 +177,8 @@ class Husk:
         self.gravity = 0
         self.dead = False
         self.dead_back = None
+        self.move_play = False
+        self.find_play = False
         
         self.collide_bottom = False
         self.collide_top = False
@@ -185,28 +186,14 @@ class Husk:
         self.collide_right = False
     
     def update(self):
-        
-        # attack range
-        if self.find == False and self.attack == False:
-            if server.knight.y - 50 < self.y + 50:
-                if server.knight.x > self.x - 400 and server.knight.x < self.x + 400:
-                    if self.dir == 1:
-                        if server.knight.x < self.x:
-                            self.dir = -1
-                        self.find = True
-                        self.frame = 0
-                    elif self.dir == -1:
-                        if server.knight.x > self.x:
-                            self.dir = 1
-                        self.find = True
-                        self.frame = 0
-        
+
         if self.dead:
             if int(self.frame) < 7:
                 self.frame = (self.frame + 8 * ACTION_PER_TIME * game_framework.frame_time) % 8
                 
             if self.dead_back == None:
-                self.death_sound.play()
+                self.death_sound1.play()
+                self.death_sound2.play()
                 self.dead_back = 3
             elif self.dead_back > 0:
                 self.gravity += 0.5
@@ -217,7 +204,9 @@ class Husk:
                 
         elif self.move:
             if server.knight.x > self.x - 1000 and server.knight.x < self.x + 1000:
-                # self.move_sound.repeat_play()
+                if self.move_play == False:
+                    # self.move_sound.play()
+                    self.move_play = True
                 pass
             self.frame = (self.frame + 7 * ACTION_PER_TIME * game_framework.frame_time) % 7
             self.x += self.dir * 2
@@ -230,8 +219,6 @@ class Husk:
             self.damage_back -= 1
         
         elif self.find:
-            self.find_sound.play()
-            
             self.move = False
             if self.attack == False:
     
@@ -244,10 +231,11 @@ class Husk:
                     self.frame = 0
         
         elif self.turn:
-            if self.x < self.range_x1:
-                self.x = self.range_x1
-            elif self.x > self.range_x2:
-                self.x = self.range_x2
+            if self.range:
+                if self.x < self.range_x1:
+                    self.x = self.range_x1
+                elif self.x > self.range_x2:
+                    self.x = self.range_x2
                     
             self.frame = (self.frame + 3 * ACTION_PER_TIME * game_framework.frame_time) % 3
             
@@ -262,7 +250,6 @@ class Husk:
                 self.move = True
                     
         elif self.attack:
-            # self.attack_sound.play()
             
             self.frame = (self.frame + 4 * ACTION_PER_TIME * game_framework.frame_time) % 4
             self.x += self.dir * 5.5
@@ -284,19 +271,37 @@ class Husk:
                         self.frame = 0
                         self.move = True
                         self.attack = False
-                        self.attack_range = 150    
+                        self.attack_range = 150 
                         
         if self.fall:
             self.gravity += G
             self.y += (FALL_G - self.gravity)
+            
+        # attack range
+        if self.find == False and self.attack == False:
+            if server.knight.y - 50 < self.y + 50:
+                if server.knight.x > self.x - 400 and server.knight.x < self.x + 400:
+                    if self.dir == 1:
+                        if server.knight.x < self.x:
+                            self.dir = -1
+                        self.find = True
+                        self.range = False
+                        self.frame = 0
+                    elif self.dir == -1:
+                        if server.knight.x > self.x:
+                            self.dir = 1
+                        self.find = True
+                        self.range = False
+                        self.frame = 0
                 
-        range_check(self)
+        if self.find == False and self.attack == False:
+            range_check(self)
         hp_check(self)
         fall_check(self)
             
     def draw(self):
         cx, cy = self.x - server.background.window_left, self.y - server.background.window_bottom
-        print("husk :",self.x, self.y)
+        
         if server.collide_box:
             draw_rectangle(*self.get_bb())
             self.font.draw(cx, cy + 80, f'(HP: {self.hp})', (255, 255, 0))
@@ -344,7 +349,6 @@ class Husk:
 class Vengefly:
     image_l = None
     image_r = None
-    move_sound = None
     find_sound = None
     death_sound = None
     font = None
@@ -357,9 +361,6 @@ class Vengefly:
             Vengefly.image_l = load_image('image/enemy/Vengefly_L.png')
         if Vengefly.image_r == None:
             Vengefly.image_r = load_image('image/enemy/Vengefly_R.png')
-        if Vengefly.move_sound == None:
-            Vengefly.move_sound = load_wav('music/enemy/vengefly_fly.wav')
-            Vengefly.move_sound.set_volume(80)
         if Vengefly.find_sound == None:
             Vengefly.find_sound = load_wav('music/enemy/vengefly_find.wav')
         if Vengefly.death_sound == None:
@@ -368,9 +369,11 @@ class Vengefly:
             Vengefly.font = load_font('font.ttf', 16)
         self.move = True
         self.range_x1, self.range_x2 = range_x1, range_x2
+        self.range = True
         self.turn = False
         self.fall = False
         self.find = False
+        self.find_play = False
         self.attack = False
         self.damage = False
         self.damage_back = 0
@@ -404,10 +407,11 @@ class Vengefly:
                 self.hp = -1
                 
         elif self.turn:
-            if self.x < self.range_x1:
-                self.x = self.range_x1
-            elif self.x > self.range_x2:
-                self.x = self.range_x2
+            if self.range:
+                if self.x < self.range_x1:
+                    self.x = self.range_x1
+                elif self.x > self.range_x2:
+                    self.x = self.range_x2
                     
             self.frame = (self.frame + 3 * ACTION_PER_TIME * game_framework.frame_time * 1.5) % 3
             
@@ -421,9 +425,7 @@ class Vengefly:
                 self.attack = False
                 self.move = True
                 
-        elif self.move:
-            # self.move_sound.play()
-                
+        elif self.move:                
             self.frame = (self.frame + 5 * ACTION_PER_TIME * game_framework.frame_time) % 5
             self.x += self.dir * 5
             
@@ -435,7 +437,9 @@ class Vengefly:
             self.damage_back -= 1
         
         elif self.find:
-                # self.find_sound.play()
+            if self.find_play == False:
+                self.find_sound.play()
+                self.find_play = True
             
             self.move = False
             if self.attack == False:
@@ -445,6 +449,8 @@ class Vengefly:
                 
                 else:
                     self.find = False
+                    self.turn = False
+                    self.move = False
                     self.attack = True
                     self.frame = 0
                     
@@ -473,20 +479,21 @@ class Vengefly:
             if server.knight.y + 30 > self.y - 400 and server.knight.y + 30 < self.y + 400:
                 if server.knight.x > self.x - 400 and server.knight.x < self.x + 400:
                     self.find = True
+                    self.range = False
                     self.frame = 0
             
         if self.fall:
             self.gravity += G
             self.y += (FALL_G - self.gravity)
                 
-        range_check(self)
+        if self.find == False and self.attack == False:
+            range_check(self)
         hp_check(self)
         if self.dead:
             fall_check(self)
             
     def draw(self):
         cx, cy = self.x - server.background.window_left, self.y - server.background.window_bottom
-        print("vengefly :", self.x, self.y)
         
         if server.collide_box:
             draw_rectangle(*self.get_bb())
@@ -530,18 +537,35 @@ class Vengefly:
         if self.dead == False:
             if group == 'spike:vengefly':
                 damage_check(self)
-            
+                
+
+class Thorn:
+    def __init__(self, x1 = 0, y1 = 0, x2 = 0, y2 = 0):
+        self.left, self.bottom, self.right, self.top = 0, 0, 0, 0
+        self.x1, self.y1, self.x2, self.y2 = x1, y1, x2, y2
+        
+        
+    def update(self):
+        self.left, self.top = self.x1 - server.background.window_left, self.y1 - server.background.window_bottom
+        self.right, self.bottom = self.x2 - server.background.window_left, self.y2 - server.background.window_bottom 
+
+    def draw(self):
+        if server.collide_box:
+                draw_rectangle(*self.get_bb())
+        
+    def get_bb(self):
+        return self.left, self.bottom, self.right, self.top
+    
+    def handle_collision(self, other, group):
+        pass
 
 
 
 
 
 
-
-
-                    
 def range_check(self):
-    if self.attack == False:
+    if self.range:
         if self.x < self.range_x1 or self.x > self.range_x2:
             self.frame = 0
             self.turn = True
@@ -593,19 +617,18 @@ def collide_wall(self, other, l, b, r, t):
             self.gravity = FALL_G
             self.fall = False
             self.jump = False
-            # self.fall_sound.play()
         self.y = other.y2 - t
                     
     if other.top - bottom > 30 or other.bottom - top > 50:
         if other.right > left and other.right - left < 50:
-            self.x += self.dir * 6
             self.x = other.x2 - l
             self.turn = True
+            self.move = False
                     
         elif other.left < right and right - other.left < 50:
-            self.x += self.dir * 6
             self.x = other.x1 - r
             self.turn = True
+            self.move = False
                     
     if self.y == other.y1 + 60:
         self.collide_bottom = True
