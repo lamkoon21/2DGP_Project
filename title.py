@@ -1,7 +1,7 @@
 from pico2d import *
 from constant_value import *
 import game_framework
-import stage1
+import stage0
 import ui_control
 
 class Title:
@@ -71,8 +71,15 @@ def handle_events():
                         input = False
                         match select:
                             case 1:
-                                # delay(1.3)
-                                game_framework.change_state(stage1)
+                                delay(1.3)
+                                game_framework.change_state(stage0)
+                                with open('knight_data.json', 'r') as f:
+                                    data = json.load(f)
+                                    data["hp"] = 5
+                                    data["soul"] = 0
+                                    data["boss_key"] = 0
+                                with open('knight_data.json', 'w') as f:
+                                    json.dump(data, f, indent="\t")
                             case 2:
                                 game_framework.push_state(ui_control)
                             case 3:
