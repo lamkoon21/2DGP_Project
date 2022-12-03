@@ -8,16 +8,17 @@ from wall import Wall
 
 
 class Knight:
-    def __init__(self):
-        self.x, self. y = None, None
+    def __init__(self, x, y, face_dir, move, hp, soul, boss_key):
+        self.x, self. y = x, y
         self.frame = 0
         self.dir = 0
-        self.face_dir = 1
+        self.face_dir = face_dir
         self.image_l = load_image('image/knight/knight_L.png')
         self.image_r = load_image('image/knight/knight_R.png')
         self.dash_effect = load_image('image/knight/dash_effect.png')
         self.attack_effect = load_image('image/knight/attack_effect.png')
         self.no_damage = load_image('image/knight/no_damage.png')
+        self.fade_out = load_image('image/knight/fade_out.png')
         self.move_sound = load_wav('music/knight/step.wav')
         self.move_sound.set_volume(80)
         self.jump_sound = load_wav('music/knight/jump.wav')
@@ -31,8 +32,11 @@ class Knight:
         self.attack_sound4 = load_wav('music/knight/sword_4.wav')
         self.attack_sound5 = load_wav('music/knight/sword_5.wav')
         self.hit_sound = load_wav('music/enemy/enemy_damage.wav')
+        self.save_sound = load_wav('music/ui/save.wav')
+        self.death_sound = load_music('music/knight/death.wav')
+        self.font = load_font('font.ttf', 16)
         self.idle = False
-        self.move = False
+        self.move = move
         self.fall = False
         self.jump = False
         self.dash = False
@@ -45,33 +49,63 @@ class Knight:
         self.map_open = False
         self.map_close = False
         self.heal = False
+        self.dead = False
         
         self.collide_bottom = False
         self.collide_top = False
         self.collide_left = False
         self.collide_right = False
         
-        self.damage_time = 100
-        self.no_dmg_time = 200
+        self.enter_boss = False
+        self.save = False
+        
+        self.damage_time = 50
+        self.no_dmg_time = 100
+        self.damage_back = None
         
         self.dash_count = 0
         
         self.gravity = 0.0
-        self.hp = 5
-        self.soul = 0
-        self.boss_key = 0
+        self.hp = hp
+        self.soul = soul
+        self.boss_key = boss_key
     
     def update(self):
         
+        if self.dead:
+            self.hp = -1
+            self.death_sound.play()
+            if int(self.frame) < 9:
+                self.frame = (self.frame + 10 * ACTION_PER_TIME * game_framework.frame_time / 2) % 10
+            else:
+                delay(1)
+                with open('knight_data.json', 'r') as f:
+                    data = json.load(f)
+                    data["hp"] = 5
+                    data["soul"] = 0
+                with open('knight_data.json', 'w') as f:
+                    json.dump(data, f, indent="\t")
+                    
+                if server.save_point == 1:
+                    server.current_stage = 'respawn1'
+                elif server.save_point == 2:
+                    server.current_stage = 'respawn2'
+                else:
+                    server.current_stage = 'respawn2_boss'
+            
+        
         # action status
-        if self.damage:
+        elif self.damage:
             self.damage_time -= 1
             if self.damage_time == 0:
+                with open('knight_data.json', 'r') as f:
+                    data = json.load(f)
+                    data["hp"] = self.hp
+                with open('knight_data.json', 'w') as f:
+                    json.dump(data, f, indent="\t")
                 self.frame = 0
-                # if self.y > bottom: self.gravity = FALL_G
-                # else: self.gravity = 0
                 self.face_dir = self.dir
-                self.damage_time = 100
+                self.damage_time = 50
                 self.dash = False
                 self.dash_count = 0
                 self.jump = False
@@ -99,7 +133,12 @@ class Knight:
                     self.attack = False
                     self.attack_2 = False
                     if self.attack_count:
-                        self.soul += 1
+                        if self.soul < 9: self.soul += 1
+                        with open('knight_data.json', 'r') as f:
+                            data = json.load(f)
+                            data["soul"] = self.soul
+                        with open('knight_data.json', 'w') as f:
+                            json.dump(data, f, indent="\t")
                         self.hit_sound.play()
                     self.attack_count = False
                     self.frame = 0
@@ -111,7 +150,12 @@ class Knight:
                     self.attack = False
                     self.attack_2 = True
                     if self.attack_count:
-                        self.soul += 1
+                        if self.soul < 9: self.soul += 1
+                        with open('knight_data.json', 'r') as f:
+                            data = json.load(f)
+                            data["soul"] = self.soul
+                        with open('knight_data.json', 'w') as f:
+                            json.dump(data, f, indent="\t")
                         self.hit_sound.play()
                     self.attack_count = False
                     self.frame = 0
@@ -167,9 +211,9 @@ class Knight:
             
         elif self.move:
             if self.dash == False:
+                self.face_dir = self.dir
                 self.frame = (self.frame + 8 * ACTION_PER_TIME * game_framework.frame_time) % 8
                 self.x += self.dir * 6
-                self.face_dir = self.dir
                 
         if self.dash:
             if self.damage == False:
@@ -191,9 +235,17 @@ class Knight:
             
         if self.no_dmg:
             self.no_dmg_time -= 1
+            if self.damage_back == None:
+                self.damage_back = 15
+            if self.damage_back > 0:
+                self.x -= self.face_dir * self.damage_back
+                self.y += self.damage_back
+                self.damage_back -= 1
+            
             if self.no_dmg_time == 0:
                 self.no_dmg = False
-                self.no_dmg_time = 200
+                self.no_dmg_time = 100
+                self.damage_back = None
                 
         if self.dash == False and self.jump == False:
             if self.collide_bottom == False and self.collide_top == False:
@@ -205,12 +257,13 @@ class Knight:
                     self.dash_count = 0
                 self.fall = False
                 
-
-        
+        if self.hp == 0:
+            self.dead = True
+            self.frame = 0
    
     def draw(self):
         cx, cy = self.x - server.background.window_left, self.y - server.background.window_bottom
-        
+                
         if self.face_dir == 1:
             if self.damage:
                 self.image_r.clip_draw(5, 560, 130, 130, cx, cy)
@@ -239,7 +292,7 @@ class Knight:
             else:
                 self.image_r.clip_draw(10, 15, 101, 120, cx, cy, 101 * ex, 120 * ex)
                 
-        elif self.face_dir == -1:
+        else:
             if self.damage:
                 self.image_r.clip_composite_draw(5, 560, 130, 130, 0, 'h', cx, cy, 130, 130)
             elif self.attack:
@@ -271,7 +324,8 @@ class Knight:
             self.no_damage.clip_draw(0, 0, 127, 125, cx + 10, cy, 200 * ex, 200 * ex)
         
         if server.collide_box:
-                draw_rectangle(*self.get_bb())
+            draw_rectangle(*self.get_bb())
+            self.font.draw(cx, cy + 80, f'(x: {self.x}, y: {self.y})', (255, 255, 0))
 
 
 
@@ -331,6 +385,18 @@ class Knight:
                         if self.idle or self.move:
                             if self.heal == False:
                                 self.heal = True
+                    
+                    case pico2d.SDLK_UP:
+                        if server.current_stage == 2 and self.boss_key == 3:
+                            self.enter_boss = True
+                        if server.current_stage == 0 or server.current_stage == 6:
+                            self.save = True
+                                
+                with open('knight_data.json', 'r') as f:
+                    data = json.load(f)
+                    data["move"] = self.move
+                with open('knight_data.json', 'w') as f:
+                    json.dump(data, f, indent="\t")
                             
         elif event.type == SDL_KEYUP:
             self.idle = True
@@ -340,8 +406,7 @@ class Knight:
                             self.move = False
                         else:
                             self.dir = 1
-                            if self.damage == False: 
-                                if self.dash == False: self.face_dir = self.dir
+                            # if self.damage == False: 
                                 # if self.y == bottom:
                                 #     self.move_sound.repeat_play()
                             self.move = True
@@ -351,8 +416,7 @@ class Knight:
                             self.move = False
                         else:
                             self.dir = -1
-                            if self.damage == False: 
-                                if self.dash == False: self.face_dir = self.dir
+                            # if self.damage == False: 
                                 # if self.y == bottom:
                                 #     self.move_sound.repeat_play()
                             self.move = True
@@ -362,6 +426,18 @@ class Knight:
                             if self.gravity < 5:
                                 self.gravity = FALL_G - 5
                             else: self.gravity = FALL_G
+                    
+                    case pico2d.SDLK_UP:
+                        if server.current_stage == 2:
+                            self.enter_boss = False
+                        if server.current_stage == 0 or server.current_stage == 6:
+                            self.save = False
+                            
+            with open('knight_data.json', 'r') as f:
+                data = json.load(f)
+                data["move"] = self.move
+            with open('knight_data.json', 'w') as f:
+                json.dump(data, f, indent="\t")
                         
     def get_bb(self):
         cx, cy = self.x - server.background.window_left, self.y - server.background.window_bottom
@@ -378,7 +454,6 @@ class Knight:
             left, bottom, right, top = cx - 15, cy - 60, cx + 38, cy + 40
         match group:
             case 'knight:wall':
-                
                 if other.top > bottom and other.top - bottom < 50:
                     if self.fall or self.jump:
                         self.frame = 0
@@ -422,6 +497,62 @@ class Knight:
                 if self.x == other.x1 - 33 or self.x == other.x2 - 43:
                     self.collide_right = True
                     
+            case 'knight:gate':
+                stage, index = other.stage, other.index
+                with open('knight_data.json', 'r') as f:
+                    data = json.load(f)
+                match stage:
+                    case 0:
+                        server.pre_stage = 0
+                        if index == 1:
+                            server.current_stage = 1
+                    case 1:
+                        server.pre_stage = 1
+                        if index == 1:
+                            server.current_stage = 0
+                        if index == 2:
+                            server.current_stage = 2
+                        if index == 3:
+                            server.current_stage = 3
+                    case 2:
+                        server.pre_stage = 2
+                        if index == 1:
+                            server.current_stage = 1
+                        if index == 2:
+                            if self.enter_boss:
+                                server.current_stage = 'boss'
+                    case 3:
+                        server.pre_stage = 3
+                        if index == 1:
+                            server.current_stage = 1
+                        if index == 2:
+                            server.current_stage = 4
+                    case 4:
+                        server.pre_stage = 4
+                        if index == 1:
+                            server.current_stage = 3
+                        if index == 2:
+                            server.current_stage = 5
+                    case 5:
+                        server.pre_stage = 5
+                        if index == 1:
+                            server.current_stage = 4
+                        if index == 2:
+                            server.current_stage = 6
+                    case 6:
+                        server.pre_stage = 6
+                        if index == 1:
+                            server.current_stage = 5
+                        if index == 2:
+                            server.current_stage = 7
+                    case 7:
+                        server.pre_stage = 7
+                        if index == 1:
+                            server.current_stage = 6
+                    case 'boss':
+                        server.pre_stage = 'boss'
+                        server.current_stage = 2
+                    
                     
             case 'knight:crawlid':
                 if other.dead == False:
@@ -431,7 +562,6 @@ class Knight:
                             self.damage = True
                             self.gravity = 10
                             self.damage_sound.play()
-                        else: self.dead = True
             case 'knight:husk':
                 if other.dead == False:
                     if self.damage == False and self.no_dmg == False:
@@ -440,7 +570,7 @@ class Knight:
                             self.damage = True
                             self.gravity = 10
                             self.damage_sound.play()
-                        else: self.dead = True
+                            
             case 'knight:vengefly':
                 if other.dead == False:
                     if self.damage == False and self.no_dmg == False:
@@ -449,7 +579,33 @@ class Knight:
                             self.damage = True
                             self.gravity = 10
                             self.damage_sound.play()
-                        else: self.dead = True
+            case 'knight:thorn':
+                if self.damage == False and self.no_dmg == False:
+                    if self.hp > 0:
+                        self.hp -= 1
+                        self.damage = True
+                        self.gravity = 10
+                        self.damage_sound.play()
+                    else: 
+                        self.dead = True
+                        self.frame = 0
+                        
+            case 'knight:boss_key':
+                self.boss_key += 1
+                with open('knight_data.json', 'r') as f:
+                    data = json.load(f)
+                    data["boss_key"] = self.boss_key
+                with open('knight_data.json', 'w') as f:
+                    json.dump(data, f, indent="\t")
+            
+            case 'knight:save_bench':
+                if self.save:
+                    if server.current_stage == 0 and server.save_point != 1:
+                        server.save_point = 1
+                        self.save_sound.play()
+                    elif server.current_stage == 6 and server.save_point != 2:
+                        server.save_point = 2
+                        self.save_sound.play()
     
     def attack_sound(self):
         if self.attack:
