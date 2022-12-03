@@ -11,9 +11,11 @@ collision_group = dict()
 
 def add_object(o, depth):
     objects[depth].append(o)
+    # print(o)
 
 def add_objects(ol, depth):
     objects[depth] += ol
+    # print(ol)
     
 
 def remove_object(o):
@@ -33,10 +35,12 @@ def all_objects():
 
 
 def clear():
-    for o in all_objects():
-        del o
-    for layer in objects:
-        layer.clear()
+    global objects
+    global collision_group
+
+    # nullify objects and collision group delete all the contained objects - automatic garbage collection
+    objects = [[], [], [], []]
+    collision_group = dict()
 
 
 
