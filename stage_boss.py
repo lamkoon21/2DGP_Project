@@ -35,36 +35,28 @@ def handle_events():
         else:
             server.knight.handle_events(event)
             
-crawlid = []
-husk = []
-vengefly = []
+front_image = None
 
 def enter():
-    global crawlid, husk, vengefly
-    crawlid = []
-    husk = []
-    vengefly = []
-    
-    set_knight('stage4')
+    set_knight()
     
     server.background = Background()
-    server.background.image = load_image('image/map/stage4.png')
+    server.background.image = load_image('image/map/boss_back.png')
     game_world.add_object(server.background, 0)
     server.background.update()
     
-    server.bgm = load_music('music/bgm/main.wav')
-    server.bgm.repeat_play()
+    global front_image
+    front_image = Background()
+    front_image.image = load_image('image/map/boss_front.png')
+    game_world.add_object(front_image, 0)
+    front_image.update()
     
-    set_enemy('stage4')
+    server.bgm = load_music('music/bgm/boss.wav')
     
-    set_wall('stage4')
+    set_wall('stage_boss')
     
-    set_gate('stage4')
-    
-    server.visit[4] = 1
-    server.current_stage = 4
-                
-
+    set_gate('stage_boss')
+            
 def exit():
     game_world.clear()
     
@@ -84,26 +76,19 @@ def update():
     for game_object in game_world.all_objects():
         game_object.update()
         
-    if server.current_stage == 3:
-        import stage3
-        game_framework.change_state(stage3)
-    elif server.current_stage == 5:
-        import stage5
-        game_framework.change_state(stage5)
-    elif server.current_stage == 'respawn1':
-        import stage0
-        game_framework.change_state(stage0)
-    elif server.current_stage == 'respawn2':
-        import stage6
-        game_framework.change_state(stage6)
+    if server.current_stage == 2:
+        import stage2
+        game_framework.change_state(stage2)
+    elif server.current_stage == 'respawn_boss':
+        import stage_boss
+        game_framework.change_state(stage_boss)
         
 def draw():
     clear_canvas()
     for game_object in game_world.all_objects():
         game_object.draw()
-    if server.knight.dead:
-        server.knight.fade_out.clip_draw(int(server.knight.frame) * 100, 0, 100, 100, 960, 540, 1920, 1080)
-
+    front_image.draw()
+    server.soul.draw()
     update_canvas()    
         
 def pause():
@@ -125,16 +110,12 @@ def collide(a, b):
         
 # set objects
     
-def set_knight(s):
+def set_knight():
     with open('knight_data.json', 'r') as f:
-        knight_data = json.load(f)
-    with open('stage_data.json', 'r') as f:
-        stage_data = json.load(f)
-        
-    if server.pre_stage == 3:
-        server.knight = Knight(stage_data[s]['gate1']['x'], stage_data[s]['gate1']['y'], stage_data[s]['gate1']['face_dir'], knight_data['move'], knight_data['hp'], knight_data['soul'], knight_data['boss_key'])
-    elif server.pre_stage == 5:
-        server.knight = Knight(stage_data[s]['gate2']['x'], stage_data[s]['gate2']['y'], stage_data[s]['gate2']['face_dir'], knight_data['move'], knight_data['hp'], knight_data['soul'], knight_data['boss_key'])
+        data = json.load(f)
+        if server.pre_stage == 2 and server.current_stage == 'boss':
+            server.knight = Knight(data['stage_boss']['gate1']['x'],data['stage_boss']['gate1']['y'], data['stage_boss']['gate1']['face_dir'], data['move'], data['hp'], data['soul'], data['boss_key'])
+            server.save_point += 2
 
     server.spike = Spike()
     server.spike.x = server.knight.x
@@ -146,28 +127,6 @@ def set_knight(s):
     game_world.add_object(server.spike, 1)
     game_world.add_object(server.soul, 2)
     
-def set_enemy(s):
-    with open('enemy_data.json','r') as f:
-        enemy_list = json.load(f)
-        crawlid_data = enemy_list[s]['crawlid']
-        for i in crawlid_data:
-            crawlid.append(Crawlid(i['x'], i['y'], i['dir'], i['range_x1'], i['range_x2']))
-            game_world.add_collision_pairs(server.knight, crawlid, 'knight:crawlid')
-            game_world.add_collision_pairs(server.spike, crawlid, 'spike:crawlid')
-        husk_data = enemy_list[s]['husk']
-        for i in husk_data:
-            husk.append(Husk(i['x'], i['y'], i['dir'], i['range_x1'], i['range_x2']))
-            game_world.add_collision_pairs(server.knight, husk, 'knight:husk')
-            game_world.add_collision_pairs(server.spike, husk, 'spike:husk')
-        vengefly_data = enemy_list[s]['vengefly']
-        for i in vengefly_data:
-            vengefly.append(Vengefly(i['x'], i['y'], i['dir'], i['range_x1'], i['range_x2']))
-            game_world.add_collision_pairs(server.knight, vengefly, 'knight:vengefly')
-            game_world.add_collision_pairs(server.spike, vengefly, 'spike:vengefly')
-        game_world.add_objects(crawlid, 1)
-        game_world.add_objects(husk, 1)
-        game_world.add_objects(vengefly, 1)
-    
 def set_wall(s):
     with open('wall_data.json', 'r') as f:
         wall_list = json.load(f)
@@ -176,9 +135,6 @@ def set_wall(s):
             wall = Wall(o['x1'], o['y1'], o['x2'], o['y2'])
             game_world.add_object(wall, 0)
             game_world.add_collision_pairs(server.knight, wall, 'knight:wall')
-            game_world.add_collision_pairs(crawlid, wall, 'crawlid:wall')
-            game_world.add_collision_pairs(husk, wall, 'husk:wall')
-            game_world.add_collision_pairs(vengefly, wall, 'vengefly:wall')
             
 def set_gate(s): 
     with open('gate_data.json', 'r') as f:

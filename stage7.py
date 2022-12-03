@@ -45,25 +45,24 @@ def enter():
     husk = []
     vengefly = []
     
-    set_knight('stage4')
+    set_knight('stage7')
     
     server.background = Background()
-    server.background.image = load_image('image/map/stage4.png')
+    server.background.image = load_image('image/map/stage7.png')
     game_world.add_object(server.background, 0)
     server.background.update()
     
     server.bgm = load_music('music/bgm/main.wav')
     server.bgm.repeat_play()
     
-    set_enemy('stage4')
+    set_enemy('stage7')
     
-    set_wall('stage4')
+    set_wall('stage7')
     
-    set_gate('stage4')
+    set_gate('stage7')
     
-    server.visit[4] = 1
-    server.current_stage = 4
-                
+    server.visit[7] = 1
+            
 
 def exit():
     game_world.clear()
@@ -84,16 +83,13 @@ def update():
     for game_object in game_world.all_objects():
         game_object.update()
         
-    if server.current_stage == 3:
-        import stage3
-        game_framework.change_state(stage3)
-    elif server.current_stage == 5:
-        import stage5
-        game_framework.change_state(stage5)
-    elif server.current_stage == 'respawn1':
+    if server.current_stage == 6:
+        import stage6
+        game_framework.change_state(stage6)
+    elif server.pre_stage == 'respawn1':
         import stage0
         game_framework.change_state(stage0)
-    elif server.current_stage == 'respawn2':
+    elif server.pre_stage == 'respawn2':
         import stage6
         game_framework.change_state(stage6)
         
@@ -131,10 +127,8 @@ def set_knight(s):
     with open('stage_data.json', 'r') as f:
         stage_data = json.load(f)
         
-    if server.pre_stage == 3:
+    if server.pre_stage == 6:
         server.knight = Knight(stage_data[s]['gate1']['x'], stage_data[s]['gate1']['y'], stage_data[s]['gate1']['face_dir'], knight_data['move'], knight_data['hp'], knight_data['soul'], knight_data['boss_key'])
-    elif server.pre_stage == 5:
-        server.knight = Knight(stage_data[s]['gate2']['x'], stage_data[s]['gate2']['y'], stage_data[s]['gate2']['face_dir'], knight_data['move'], knight_data['hp'], knight_data['soul'], knight_data['boss_key'])
 
     server.spike = Spike()
     server.spike.x = server.knight.x

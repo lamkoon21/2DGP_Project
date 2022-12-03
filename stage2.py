@@ -4,11 +4,13 @@ from background import FixedBackground as Background
 import server
 import game_framework
 import game_world
-import player
-import enemy
+from player import Knight, Spike
+from enemy import Crawlid, Husk, Vengefly
+from gate import Gate
 import ui_soul
 import ui_map
 from wall import Wall
+from boss_key_status import Bosskey_status
 
 def handle_events():
     events = get_events()
@@ -34,28 +36,35 @@ def handle_events():
         else:
             server.knight.handle_events(event)
 
+boss_key_status = None
+
 def enter():
+    set_knight('stage2')
+    
     server.background = Background()
-    server.background.select_map = 2
-    server.background.image = load_image('image/map/map2.png')
-    server.background.w = server.background.image.w
-    server.background.h = server.background.image.h
+    server.background.image = load_image('image/map/stage2.png')
     game_world.add_object(server.background, 0)
-        
+    server.background.update()
+    
     server.bgm = load_music('music/bgm/main.wav')
     server.bgm.repeat_play()
     
-    # init 2660
-    set_knight(1000, 1000)
+    with open('knight_data.json', 'r') as f:
+        data = json.load(f)
+        key_num = data['boss_key']
+        
+        global boss_key_status
+        boss_key_status = Bosskey_status(3040, 1150, key_num)
+        game_world.add_object(boss_key_status, 0)
     
-    with open('wall_data.json', 'r') as f:
-        wall_list = json.load(f)
-        wall_data = wall_list['stage2']
-        for o in wall_data:
-            wall = Wall(o['x1'], o['y1'], o['x2'], o['y2'])
-            game_world.add_object(wall, 0)
-            game_world.add_collision_pairs(server.knight, wall, 'knight:wall')
+    set_wall('stage2')
     
+    set_gate('stage2')
+    
+    server.visit[2] = 1
+    server.current_stage = 2
+                
+
 def exit():
     game_world.clear()
     
@@ -74,16 +83,23 @@ def update():
             
     for game_object in game_world.all_objects():
         game_object.update()
-    
+        
+    if server.current_stage == 1:
+        import stage1
+        game_framework.change_state(stage1)
+    elif server.current_stage == 'boss':
+        import stage_boss
+        game_framework.change_state(stage_boss)
+        
         
 def draw():
     clear_canvas()
-    draw_world()
-    update_canvas()
-
-def draw_world():
     for game_object in game_world.all_objects():
         game_object.draw()
+    if server.knight.dead:
+        server.knight.fade_out.clip_draw(int(server.knight.frame) * 100, 0, 100, 100, 960, 540, 1920, 1080)
+
+    update_canvas()    
         
 def pause():
     pass
@@ -101,22 +117,45 @@ def collide(a, b):
     if top_a < bottom_b: return False
     
     return True
-
-
-
         
 # set objects
     
-def set_knight(x, y):
-    server.knight = player.Knight(x, y, 5, 0, 0)
-    server.knight.x = x
-    server.knight.y = y
-    server.spike = player.Spike()
-    server.spike.x = x
-    server.spike.y = y
+def set_knight(s):
+    with open('knight_data.json', 'r') as f:
+        knight_data = json.load(f)
+    with open('stage_data.json', 'r') as f:
+        stage_data = json.load(f)
+        
+    if server.pre_stage == 1:
+        server.knight = Knight(stage_data[s]['gate1']['x'], stage_data[s]['gate1']['y'], stage_data[s]['gate1']['face_dir'], knight_data['move'], knight_data['hp'], knight_data['soul'], knight_data['boss_key'])
+    elif server.pre_stage == 'boss':
+        server.knight = Knight(stage_data[s]['gate2']['x'], stage_data[s]['gate2']['y'], stage_data[s]['gate2']['face_dir'], knight_data['move'], knight_data['hp'], knight_data['soul'], knight_data['boss_key'])
+        server.save_point -= 2
+        
+    server.spike = Spike()
+    server.spike.x = server.knight.x
+    server.spike.y = server.knight.y
     server.soul = ui_soul.Soul()
     server.soul.hp = server.knight.hp
     server.soul.soul = server.knight.soul
     game_world.add_object(server.knight, 1)
     game_world.add_object(server.spike, 1)
     game_world.add_object(server.soul, 2)
+    
+def set_wall(s):
+    with open('wall_data.json', 'r') as f:
+        wall_list = json.load(f)
+        wall_data = wall_list[s]
+        for o in wall_data:
+            wall = Wall(o['x1'], o['y1'], o['x2'], o['y2'])
+            game_world.add_object(wall, 0)
+            game_world.add_collision_pairs(server.knight, wall, 'knight:wall')
+            
+def set_gate(s): 
+    with open('gate_data.json', 'r') as f:
+        gate_list = json.load(f)
+        gate_data = gate_list[s]
+        for o in gate_data:
+            gate = Gate(o['stage'], o['index'], o['x1'], o['y1'], o['x2'], o['y2'])
+            game_world.add_object(gate, 0)
+            game_world.add_collision_pairs(server.knight, gate, 'knight:gate')
