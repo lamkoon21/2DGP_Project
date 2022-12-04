@@ -578,6 +578,8 @@ def collide_wall(self, other, l, b, r, t):
 
     if other.top > bottom and other.top - bottom < 50:
         if self.dead:
+            if self.dead_back == None:
+                self.dead_back = 3
             if self.dead_back > 0:
                 self.dead_back -= 1
                 self.gravity = 0

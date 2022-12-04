@@ -131,8 +131,9 @@ def set_knight(s):
         server.knight = Knight(stage_data[s]['gate1']['x'], stage_data[s]['gate1']['y'], stage_data[s]['gate1']['face_dir'], knight_data['move'], knight_data['hp'], knight_data['soul'], knight_data['boss_key'])
     elif server.pre_stage == 'boss':
         server.knight = Knight(stage_data[s]['gate2']['x'], stage_data[s]['gate2']['y'], stage_data[s]['gate2']['face_dir'], knight_data['move'], knight_data['hp'], knight_data['soul'], knight_data['boss_key'])
-        server.save_point -= 2
+        knight_data["save_point"] += 2
         
+    
     server.spike = Spike()
     server.spike.x = server.knight.x
     server.spike.y = server.knight.y

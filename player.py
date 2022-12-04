@@ -208,6 +208,12 @@ class Knight:
             if self.dead == False and self.soul > 2 and self.hp < 5:
                 self.soul -= 3
                 self.hp += 1
+                with open('data/knight_data.json', 'r') as f:
+                    data = json.load(f)
+                    data["hp"] = self.hp
+                    data["soul"] = self.soul
+                with open('data/knight_data.json', 'w') as f:
+                    json.dump(data, f, indent="\t")
             self.heal = False
             
         elif self.move:
