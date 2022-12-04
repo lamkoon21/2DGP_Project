@@ -19,10 +19,7 @@ class Knight:
         self.attack_effect = load_image('image/knight/attack_effect.png')
         self.no_damage = load_image('image/knight/no_damage.png')
         self.fade_out = load_image('image/knight/fade_out.png')
-        self.move_sound = load_wav('music/knight/step.wav')
-        self.move_sound.set_volume(80)
         self.jump_sound = load_wav('music/knight/jump.wav')
-        self.fall_sound = load_wav('music/knight/falling.wav')
         self.land_sound = load_wav('music/knight/land.wav')
         self.dash_sound = load_wav('music/knight/dash.wav')
         self.damage_sound = load_wav('music/knight/damage.wav')
@@ -464,7 +461,7 @@ class Knight:
                         self.gravity = 0
                         self.fall = False
                         self.jump = False
-                        # self.land_sound.play()
+                        self.land_sound.play()
                     self.y = other.y1 + 60
                     
                 elif other.bottom < top and top - other.bottom < 50:
@@ -473,7 +470,6 @@ class Knight:
                         self.gravity = FALL_G
                         self.fall = False
                         self.jump = False
-                        # self.fall_sound.play()
                     self.y = other.y2 - 60
                     
                 if other.top - bottom > 30 or other.bottom - top > 50:

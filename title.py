@@ -13,7 +13,7 @@ class Title:
         self.pointer = load_image('image/title/title_pointer.png')
         self.control = load_image('image/title/control.png')
         self.font = load_font('font.ttf', 50)
-        self.bgm = load_music('music/bgm/title.wav')
+        self.bgm = load_music('music/bgm/title.mp3')
         self.select = load_wav('music/ui/title_select.wav')
         self.confirm = load_wav('music/ui/ui_confirm.wav')
         self.bgm.repeat_play()

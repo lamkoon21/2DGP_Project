@@ -53,7 +53,7 @@ def enter():
     game_world.add_object(front_image, 0)
     front_image.update()
     
-    server.bgm = load_music('music/bgm/boss.wav')
+    server.bgm = load_music('music/bgm/boss.mp3')
     
     set_wall('stage_boss')
     

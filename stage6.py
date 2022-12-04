@@ -72,11 +72,11 @@ def enter():
     game_world.add_object(server.background, 0)
     server.background.update()
     
-    server.bgm = load_music('music/bgm/main.wav')
+    server.bgm = load_music('music/bgm/main.mp3')
     server.bgm.repeat_play()
     
     global save_bgm
-    save_bgm = load_music('music/bgm/save_point.wav')
+    save_bgm = load_music('music/bgm/save_point.mp3')
     
     set_enemy('stage6')
     

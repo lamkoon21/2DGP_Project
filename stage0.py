@@ -66,7 +66,7 @@ def enter():
         game_world.add_object(boss_key, 1)
         game_world.add_collision_pairs(server.knight, boss_key, 'knight:boss_key')
     
-    server.bgm = load_music('music/bgm/stage0.wav')
+    server.bgm = load_music('music/bgm/stage0.mp3')
     
     set_wall('stage0')
     

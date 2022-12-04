@@ -130,8 +130,6 @@ class Crawlid:
 class Husk:
     image_l = None
     image_r = None
-    move_sound = None
-    find_sound = None
     death_sound1 = None
     death_sound2 = None
     font = None
