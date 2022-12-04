@@ -10,6 +10,4 @@ key_in_stage = [0, 0, 0]
 pre_stage = 0
 current_stage = 1
 
-save_point = 1
-
 collide_box = True

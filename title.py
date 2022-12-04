@@ -2,6 +2,7 @@ from pico2d import *
 from constant_value import *
 import game_framework
 import stage0
+import stage6
 import ui_control
 
 class Title:
@@ -74,16 +75,23 @@ def handle_events():
                                 delay(1.3)
                                 with open('data/knight_data.json', 'r') as f:
                                     data = json.load(f)
-                                    data["hp"] = 5
-                                    data["soul"] = 0
-                                    data["boss_key"] = 0
                                     data["move"] = False
                                 with open('data/knight_data.json', 'w') as f:
                                     json.dump(data, f, indent="\t")
+                                save_point = data["save_point"]
                                 import server
-                                server.pre_stage = -1
-                                server.current_stage = 0
-                                game_framework.change_state(stage0)
+                                if save_point == 0:
+                                    server.pre_stage = -1
+                                    server.current_stage = 0
+                                    game_framework.change_state(stage0)
+                                elif save_point == 1:
+                                    server.pre_stage = -1
+                                    server.current_stage = 'respawn1'
+                                    game_framework.change_state(stage0)
+                                elif save_point == 2:
+                                    server.pre_stage = -1
+                                    server.current_stage = 'respawn2'
+                                    game_framework.change_state(stage6)
                             case 2:
                                 game_framework.push_state(ui_control)
                             case 3:

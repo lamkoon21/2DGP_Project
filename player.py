@@ -76,22 +76,26 @@ class Knight:
             self.hp = -1
             self.death_sound.play()
             if int(self.frame) < 9:
-                self.frame = (self.frame + 10 * ACTION_PER_TIME * game_framework.frame_time / 2) % 10
+                self.frame = (self.frame + 10 * ACTION_PER_TIME * game_framework.frame_time ) % 10
             else:
                 delay(1)
                 with open('data/knight_data.json', 'r') as f:
                     data = json.load(f)
                     data["hp"] = 5
                     data["soul"] = 0
+                    save_point = data["save_point"]
+                if save_point == 0:
+                    server.pre_stage = -1
+                    server.current_stage = 0
+                if save_point == 1:
+                    server.current_stage = 'respawn1'
+                elif save_point == 2:
+                    server.current_stage = 'respawn2'
+                elif save_point > 2:
+                    server.current_stage = 'respawn2_boss'
+                    
                 with open('data/knight_data.json', 'w') as f:
                     json.dump(data, f, indent="\t")
-                    
-                if server.save_point == 1:
-                    server.current_stage = 'respawn1'
-                elif server.save_point == 2:
-                    server.current_stage = 'respawn2'
-                else:
-                    server.current_stage = 'respawn2_boss'
             
         
         # action status
@@ -605,13 +609,20 @@ class Knight:
                     json.dump(data, f, indent="\t")
             
             case 'knight:save_bench':
+                with open('data/knight_data.json', 'r') as f:
+                    data = json.load(f)
+                    save_point = data["save_point"]
+                
                 if self.save:
-                    if server.current_stage == 0 and server.save_point != 1:
-                        server.save_point = 1
+                    if server.current_stage == 0 and save_point != 1:
+                        save_point = 1
                         self.save_sound.play()
-                    elif server.current_stage == 6 and server.save_point != 2:
-                        server.save_point = 2
+                    elif server.current_stage == 6 and save_point != 2:
+                        save_point = 2
                         self.save_sound.play()
+                        
+                with open('data/knight_data.json', 'w') as f:
+                    json.dump(data, f, indent="\t")
     
     def attack_sound(self):
         if self.attack:
