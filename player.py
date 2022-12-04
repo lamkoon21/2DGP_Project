@@ -79,11 +79,11 @@ class Knight:
                 self.frame = (self.frame + 10 * ACTION_PER_TIME * game_framework.frame_time / 2) % 10
             else:
                 delay(1)
-                with open('knight_data.json', 'r') as f:
+                with open('data/knight_data.json', 'r') as f:
                     data = json.load(f)
                     data["hp"] = 5
                     data["soul"] = 0
-                with open('knight_data.json', 'w') as f:
+                with open('data/knight_data.json', 'w') as f:
                     json.dump(data, f, indent="\t")
                     
                 if server.save_point == 1:
@@ -98,10 +98,10 @@ class Knight:
         elif self.damage:
             self.damage_time -= 1
             if self.damage_time == 0:
-                with open('knight_data.json', 'r') as f:
+                with open('data/knight_data.json', 'r') as f:
                     data = json.load(f)
                     data["hp"] = self.hp
-                with open('knight_data.json', 'w') as f:
+                with open('data/knight_data.json', 'w') as f:
                     json.dump(data, f, indent="\t")
                 self.frame = 0
                 self.face_dir = self.dir
@@ -134,10 +134,10 @@ class Knight:
                     self.attack_2 = False
                     if self.attack_count:
                         if self.soul < 9: self.soul += 1
-                        with open('knight_data.json', 'r') as f:
+                        with open('data/knight_data.json', 'r') as f:
                             data = json.load(f)
                             data["soul"] = self.soul
-                        with open('knight_data.json', 'w') as f:
+                        with open('data/knight_data.json', 'w') as f:
                             json.dump(data, f, indent="\t")
                         self.hit_sound.play()
                     self.attack_count = False
@@ -151,10 +151,10 @@ class Knight:
                     self.attack_2 = True
                     if self.attack_count:
                         if self.soul < 9: self.soul += 1
-                        with open('knight_data.json', 'r') as f:
+                        with open('data/knight_data.json', 'r') as f:
                             data = json.load(f)
                             data["soul"] = self.soul
-                        with open('knight_data.json', 'w') as f:
+                        with open('data/knight_data.json', 'w') as f:
                             json.dump(data, f, indent="\t")
                         self.hit_sound.play()
                     self.attack_count = False
@@ -392,10 +392,10 @@ class Knight:
                         if server.current_stage == 0 or server.current_stage == 6:
                             self.save = True
                                 
-                with open('knight_data.json', 'r') as f:
+                with open('data/knight_data.json', 'r') as f:
                     data = json.load(f)
                     data["move"] = self.move
-                with open('knight_data.json', 'w') as f:
+                with open('data/knight_data.json', 'w') as f:
                     json.dump(data, f, indent="\t")
                             
         elif event.type == SDL_KEYUP:
@@ -433,10 +433,10 @@ class Knight:
                         if server.current_stage == 0 or server.current_stage == 6:
                             self.save = False
                             
-            with open('knight_data.json', 'r') as f:
+            with open('data/knight_data.json', 'r') as f:
                 data = json.load(f)
                 data["move"] = self.move
-            with open('knight_data.json', 'w') as f:
+            with open('data/knight_data.json', 'w') as f:
                 json.dump(data, f, indent="\t")
                         
     def get_bb(self):
@@ -499,7 +499,7 @@ class Knight:
                     
             case 'knight:gate':
                 stage, index = other.stage, other.index
-                with open('knight_data.json', 'r') as f:
+                with open('data/knight_data.json', 'r') as f:
                     data = json.load(f)
                 match stage:
                     case 0:
@@ -550,8 +550,14 @@ class Knight:
                         if index == 1:
                             server.current_stage = 6
                     case 'boss':
-                        server.pre_stage = 'boss'
-                        server.current_stage = 2
+                        if index == 1:
+                            server.pre_stage = 'boss'
+                            server.current_stage = 2
+                        if index == 2:
+                            server.pre_stage = 0
+                            server.current_stage =0
+                            import title
+                            game_framework.change_state(title)
                     
                     
             case 'knight:crawlid':
@@ -592,10 +598,10 @@ class Knight:
                         
             case 'knight:boss_key':
                 self.boss_key += 1
-                with open('knight_data.json', 'r') as f:
+                with open('data/knight_data.json', 'r') as f:
                     data = json.load(f)
                     data["boss_key"] = self.boss_key
-                with open('knight_data.json', 'w') as f:
+                with open('data/knight_data.json', 'w') as f:
                     json.dump(data, f, indent="\t")
             
             case 'knight:save_bench':

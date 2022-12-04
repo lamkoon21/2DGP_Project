@@ -122,9 +122,9 @@ def collide(a, b):
 # set objects
     
 def set_knight(s):
-    with open('knight_data.json', 'r') as f:
+    with open('data/knight_data.json', 'r') as f:
         knight_data = json.load(f)
-    with open('stage_data.json', 'r') as f:
+    with open('data/stage_data.json', 'r') as f:
         stage_data = json.load(f)
         
     if server.pre_stage == 6:
@@ -141,7 +141,7 @@ def set_knight(s):
     game_world.add_object(server.soul, 2)
     
 def set_enemy(s):
-    with open('enemy_data.json','r') as f:
+    with open('data/enemy_data.json','r') as f:
         enemy_list = json.load(f)
         crawlid_data = enemy_list[s]['crawlid']
         for i in crawlid_data:
@@ -163,7 +163,7 @@ def set_enemy(s):
         game_world.add_objects(vengefly, 1)
     
 def set_wall(s):
-    with open('wall_data.json', 'r') as f:
+    with open('data/wall_data.json', 'r') as f:
         wall_list = json.load(f)
         wall_data = wall_list[s]
         for o in wall_data:
@@ -175,7 +175,7 @@ def set_wall(s):
             game_world.add_collision_pairs(vengefly, wall, 'vengefly:wall')
             
 def set_gate(s): 
-    with open('gate_data.json', 'r') as f:
+    with open('data/gate_data.json', 'r') as f:
         gate_list = json.load(f)
         gate_data = gate_list[s]
         for o in gate_data:

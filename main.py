@@ -5,5 +5,5 @@ import stage1
 import title
 
 pico2d.open_canvas(1920, 1080, True, True)
-game_framework.run(stage1)
+game_framework.run(title)
 pico2d.close_canvas()

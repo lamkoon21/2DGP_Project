@@ -38,7 +38,7 @@ def handle_events():
 front_image = None
 
 def enter():
-    set_knight()
+    set_knight('stage_boss')
     
     server.background = Background()
     server.background.image = load_image('image/map/boss_back.png')
@@ -110,12 +110,15 @@ def collide(a, b):
         
 # set objects
     
-def set_knight():
-    with open('knight_data.json', 'r') as f:
-        data = json.load(f)
-        if server.pre_stage == 2 and server.current_stage == 'boss':
-            server.knight = Knight(data['stage_boss']['gate1']['x'],data['stage_boss']['gate1']['y'], data['stage_boss']['gate1']['face_dir'], data['move'], data['hp'], data['soul'], data['boss_key'])
-            server.save_point += 2
+def set_knight(s):
+    with open('data/knight_data.json', 'r') as f:
+        knight_data = json.load(f)
+    with open('data/stage_data.json', 'r') as f:
+        stage_data = json.load(f)
+        
+    if server.pre_stage == 2:
+        server.knight = Knight(stage_data[s]['gate1']['x'], stage_data[s]['gate1']['y'], stage_data[s]['gate1']['face_dir'], knight_data['move'], knight_data['hp'], knight_data['soul'], knight_data['boss_key'])
+        server.save_point += 2
 
     server.spike = Spike()
     server.spike.x = server.knight.x
@@ -128,7 +131,7 @@ def set_knight():
     game_world.add_object(server.soul, 2)
     
 def set_wall(s):
-    with open('wall_data.json', 'r') as f:
+    with open('data/wall_data.json', 'r') as f:
         wall_list = json.load(f)
         wall_data = wall_list[s]
         for o in wall_data:
@@ -137,7 +140,7 @@ def set_wall(s):
             game_world.add_collision_pairs(server.knight, wall, 'knight:wall')
             
 def set_gate(s): 
-    with open('gate_data.json', 'r') as f:
+    with open('data/gate_data.json', 'r') as f:
         gate_list = json.load(f)
         gate_data = gate_list[s]
         for o in gate_data:
