@@ -610,12 +610,16 @@ class Knight:
                     save_point = data["save_point"]
                 
                 if self.save:
+                    self.hp = 5
+                    data["hp"] = self.hp
                     if server.current_stage == 0 and save_point != 1:
                         save_point = 1
+                        data["save_point"] = save_point
                         self.save_sound.play()
                     elif server.current_stage == 6 and save_point != 2:
                         save_point = 2
                         self.save_sound.play()
+                        data["save_point"] = save_point
                         
                 with open('data/knight_data.json', 'w') as f:
                     json.dump(data, f, indent="\t")
