@@ -10,4 +10,4 @@ key_in_stage = [0, 0, 0]
 pre_stage = 0
 current_stage = 1
 
-collide_box = True
+collide_box = False
