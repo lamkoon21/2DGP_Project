@@ -36,6 +36,7 @@ def handle_events():
             server.knight.handle_events(event)
 
 front_image = None
+play_bgm = False
 
 def enter():
     print('stage0')
@@ -65,7 +66,6 @@ def enter():
         game_world.add_collision_pairs(server.knight, boss_key, 'knight:boss_key')
     
     server.bgm = load_music('music/bgm/stage0.wav')
-    server.bgm.repeat_play()
     
     set_wall('stage0')
     
@@ -93,6 +93,17 @@ def update():
             
     for game_object in game_world.all_objects():
         game_object.update()
+    
+    global play_bgm    
+    if play_bgm == False and server.knight.x > 5300 and server.knight.x < 11300:
+        server.bgm.repeat_play()
+        play_bgm = True
+        
+    if server.knight.x < 5300 or server.knight.x > 11300:
+        if play_bgm:
+            server.bgm.stop()
+            play_bgm = False
+        
         
     if server.current_stage == 1:
         import stage1

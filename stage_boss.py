@@ -36,6 +36,7 @@ def handle_events():
             server.knight.handle_events(event)
             
 front_image = None
+play_bgm = False
 
 def enter():
     set_knight('stage_boss')
@@ -75,6 +76,13 @@ def update():
             
     for game_object in game_world.all_objects():
         game_object.update()
+    
+    global play_bgm
+    if play_bgm == False:
+        if server.background.boss_stage:
+            server.bgm.repeat_play()
+            play_bgm = True        
+        
         
     if server.current_stage == 2:
         import stage2
@@ -118,7 +126,7 @@ def set_knight(s):
         
     if server.pre_stage == 2:
         server.knight = Knight(stage_data[s]['gate1']['x'], stage_data[s]['gate1']['y'], stage_data[s]['gate1']['face_dir'], knight_data['move'], knight_data['hp'], knight_data['soul'], knight_data['boss_key'])
-        server.save_point += 2
+        knight_data["save_point"] += 2
 
     server.spike = Spike()
     server.spike.x = server.knight.x
